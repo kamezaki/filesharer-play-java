@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.UUID;
 
 import play.Logger;
-import play.api.Play;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Http.MultipartFormData;
@@ -16,7 +15,6 @@ import views.html.index;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.io.Files;
-import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
 public class Application extends Controller {
