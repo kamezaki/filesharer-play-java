@@ -2,8 +2,12 @@ package controllers;
 
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.UUID;
+
+import javax.activation.MimetypesFileTypeMap;
 
 import play.Logger;
 import play.libs.Json;
@@ -15,17 +19,28 @@ import views.html.index;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.io.Files;
+import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
 public class Application extends Controller {
+  private static Config config = ConfigFactory.load();
+  private static MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();
   
   public static Result index() {
     return ok(index.render("Your new application is ready."));
   }
   
   public static Result sharer(String file) {
-    String folder = ConfigFactory.load().getString("filesharer.store.path");
-    return ok(new File(folder, file));
+    String folder = config.getString("filesharer.store.path");
+    File target = new File(folder, file);
+    String contentType = mimeTypesMap.getContentType(target);
+    try {
+      return ok(new FileInputStream(target)).as(contentType);
+    } catch (FileNotFoundException e) {
+      Logger.info("file not found %s", target.getAbsolutePath());
+      flash("error", "read file");
+      return redirect(routes.Application.index());
+    }
   }
   
   public static Result upload() {

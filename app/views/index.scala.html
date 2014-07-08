@@ -13,6 +13,7 @@
             var textNode = document.createTextNode('uploaded file');
             var link = document.createElement('a');
             link.setAttribute('href', result.path);
+            link.setAttribute('target', '_blank');
             link.appendChild(textNode);
             file.previewTemplate.appendChild(link);
           });
