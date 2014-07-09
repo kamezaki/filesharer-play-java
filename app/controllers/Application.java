@@ -1,15 +1,12 @@
 package controllers;
 
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.UUID;
 
 import javax.activation.MimetypesFileTypeMap;
 
-import play.Logger;
 import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Controller;
@@ -18,9 +15,10 @@ import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Http.Request;
 import play.mvc.Result;
 import views.html.index;
+import biz.info_cloud.filesharer.service.FileStoreService;
+import biz.info_cloud.filesharer.service.FileStoreService.StoredFile;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.io.Files;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
@@ -34,14 +32,21 @@ public class Application extends Controller {
   }
   
   
-  private static File getFile(String filename) {
+  private static StoredFile getFile(String filename) {
     String folder = config.getString(storePath);
-    return new File(folder, filename);
+    FileStoreService service = new FileStoreService(folder);
+    return service.getStoredFile(filename);
   }
   
-  private static Result returnSharer(File file) throws FileNotFoundException {
-    String contentType = mimeTypesMap.getContentType(file);
-    return ok(new FileInputStream(file)).as(contentType);
+  private static Result returnSharer(StoredFile file)
+      throws FileNotFoundException {
+    String contentType = mimeTypesMap.getContentType(
+        file.getAbsolutePath());
+    if (!file.exists()) {
+      throw new FileNotFoundException(
+          String.format("%s is not found", file.getRelativePath()));
+    }
+    return ok(new FileInputStream(file.getAbsolutePath())).as(contentType);
   }
   
   private static Result returnSharerWithError(Throwable t) {
@@ -57,44 +62,21 @@ public class Application extends Controller {
                   .recover(t -> returnSharerWithError(t));
   }
   
-  public static Result sharer2(String file) {
-    String folder = config.getString(storePath);
-    File target = new File(folder, file);
-    String contentType = mimeTypesMap.getContentType(target);
-    try {
-      return ok(new FileInputStream(target)).as(contentType);
-    } catch (FileNotFoundException e) {
-      Logger.info("file not found %s", target.getAbsolutePath());
-      flash("error", "read file");
-      return notFound(String.format("%s not found", file));
-    }
-  }
-  
-  private static String saveFile(final Request request) throws IOException {
+  private static StoredFile saveFile(final Request request) throws IOException {
     MultipartFormData body = request().body().asMultipartFormData();
     FilePart uploadFile = body.getFile("file");
     if (uploadFile == null) {
       throw new IOException("missing upload file");
     }
-    String filename = uploadFile.getFilename();
-    int index = filename.lastIndexOf(".");
-    String ext = "";
-    if (index >= 0) {
-      ext = filename.substring(index);
-    }
-    File file = uploadFile.getFile();
-
-    // save to store
+    
     String folder = config.getString("filesharer.store.path");
-    String saveFilename = UUID.randomUUID().toString() + ext;
-    File writeFile = new File(folder, saveFilename);
-    Files.copy(file, writeFile);
-    return saveFilename;
+    FileStoreService service = new FileStoreService(folder);
+    return service.saveFile(uploadFile.getFile(), uploadFile.getFilename());
   }
   
-  private static Result returnSaveFile(final String path) {
+  private static Result returnSaveFile(final StoredFile storedFile) {
     ObjectNode result = Json.newObject();
-    result.put("path", String.format("/sharer/%s", path));
+    result.put("path", "/sharer/" + storedFile.getRelativePath());
     return ok(result);
   }
   
