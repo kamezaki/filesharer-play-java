@@ -4,7 +4,6 @@ package controllers;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.UUID;
 
 import javax.activation.MimetypesFileTypeMap;
@@ -39,42 +38,40 @@ public class Application extends Controller {
     } catch (FileNotFoundException e) {
       Logger.info("file not found %s", target.getAbsolutePath());
       flash("error", "read file");
-      return redirect(routes.Application.index());
+      return notFound(String.format("%s not found", file));
     }
   }
   
   public static Result upload() {
     MultipartFormData body = request().body().asMultipartFormData();
-    FilePart uploadFile = body.getFile("file");
-    if (uploadFile == null) {
-      flash("error", "Missing file");
-      return redirect(routes.Application.index());
-    }
-    String filename = uploadFile.getFilename();
-    int index = filename.lastIndexOf(".");
-    String ext = "";
-    if (index >= 0) {
-      ext = filename.substring(index);
-    }
-    String contentType = uploadFile.getContentType();
-    File file = uploadFile.getFile();
-    Logger.debug(String.format("filename %s contentType %s ext %s", filename, contentType, ext));
-
-    String folder = ConfigFactory.load().getString("filesharer.store.path");
-    String saveFilename = UUID.randomUUID().toString() + ext;
-    File writeFile = new File(folder, saveFilename);
     try {
+      FilePart uploadFile = body.getFile("file");
+      if (uploadFile == null) {
+        flash("error", "Missing file");
+        return redirect(routes.Application.index());
+      }
+      String filename = uploadFile.getFilename();
+      int index = filename.lastIndexOf(".");
+      String ext = "";
+      if (index >= 0) {
+        ext = filename.substring(index);
+      }
+      File file = uploadFile.getFile();
+
+      // save to store
+      String folder = ConfigFactory.load().getString("filesharer.store.path");
+      String saveFilename = UUID.randomUUID().toString() + ext;
+      File writeFile = new File(folder, saveFilename);
       Files.copy(file, writeFile);
-    } catch (IOException e) {
-      Logger.error("write file error", e);
-      flash("error", "write file");
+      
+      ObjectNode result = Json.newObject();
+      result.put("path", String.format("/sharer/%s", saveFilename));
+      return ok(result);
+      
+    } catch(Exception e) {
+      Logger.error("unknown error", e);
       return redirect(routes.Application.index());
     }
-    
-    Logger.debug(String.format("folder %s", folder));
-    ObjectNode result = Json.newObject();
-    result.put("path", String.format("/sharer/%s", saveFilename));
-    return ok(result);
   }
 
 }
