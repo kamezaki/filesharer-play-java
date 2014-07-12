@@ -26,7 +26,11 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
 public class Application extends Controller {
-  public static final String storePath = "filesharer.store.path";
+  public static final String ConfigStorePath = "filesharer.store.path";
+  public static final String FilePartParam = "file";
+  public static final String FallbackModeParam = "fallback-mode";
+  public static final String JsonPathParam = "path";
+  
   private static Config config = ConfigFactory.load();
   private static MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();
   
@@ -36,7 +40,7 @@ public class Application extends Controller {
   
   
   private static StoredFile getFile(String filename) {
-    String folder = config.getString(storePath);
+    String folder = config.getString(ConfigStorePath);
     FileStoreService service = new FileStoreService(folder);
     return service.getStoredFile(filename);
   }
@@ -71,14 +75,14 @@ public class Application extends Controller {
     if (body == null) {
       throw new IOException("missing mutipart body");
     }
-    FilePart uploadFile = body.getFile("file");
+    FilePart uploadFile = body.getFile(FilePartParam);
     if (uploadFile == null) {
       throw new IOException("missing upload file");
     }
     Map<String, String[]> queryMap = body.asFormUrlEncoded();
     boolean isFallback = false;
     if (queryMap != null &&
-        queryMap.containsKey("fallback-mode")) {
+        queryMap.containsKey(FallbackModeParam)) {
       isFallback = true;
     }
     
@@ -97,7 +101,9 @@ public class Application extends Controller {
           controllers.routes.Application.sharer(storedFile.getRelativePath()));
     } else {
       ObjectNode result = Json.newObject();
-      result.put("path", "/sharer/" + storedFile.getRelativePath());
+      String sharedPath = controllers.routes.Application.sharer(
+          storedFile.getRelativePath()).toString();
+      result.put(JsonPathParam, sharedPath);
       return ok(result);
     }
   }
