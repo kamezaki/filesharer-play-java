@@ -4,10 +4,13 @@ package controllers;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Map;
 
 import javax.activation.MimetypesFileTypeMap;
 
+import play.libs.F;
 import play.libs.F.Promise;
+import play.libs.F.Tuple;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Http.MultipartFormData;
@@ -62,22 +65,41 @@ public class Application extends Controller {
                   .recover(t -> returnSharerWithError(t));
   }
   
-  private static StoredFile saveFile(final Request request) throws IOException {
+  private static Tuple<StoredFile, Boolean> saveFile(
+      final Request request) throws IOException {
     MultipartFormData body = request().body().asMultipartFormData();
+    if (body == null) {
+      throw new IOException("missing mutipart body");
+    }
     FilePart uploadFile = body.getFile("file");
     if (uploadFile == null) {
       throw new IOException("missing upload file");
     }
+    Map<String, String[]> queryMap = body.asFormUrlEncoded();
+    boolean isFallback = false;
+    if (queryMap != null &&
+        queryMap.containsKey("fallback-mode")) {
+      isFallback = true;
+    }
     
     String folder = config.getString("filesharer.store.path");
     FileStoreService service = new FileStoreService(folder);
-    return service.saveFile(uploadFile.getFile(), uploadFile.getFilename());
+    StoredFile storedFile = service.saveFile(
+        uploadFile.getFile(), uploadFile.getFilename());
+    return new F.Tuple<StoredFile, Boolean>(storedFile, Boolean.valueOf(isFallback));
   }
   
-  private static Result returnSaveFile(final StoredFile storedFile) {
-    ObjectNode result = Json.newObject();
-    result.put("path", "/sharer/" + storedFile.getRelativePath());
-    return ok(result);
+  private static Result returnSaveFile(final Tuple<StoredFile, Boolean> tuple) {
+    StoredFile storedFile = tuple._1;
+    boolean isFallback = tuple._2.booleanValue();
+    if (isFallback) {
+      return redirect(
+          controllers.routes.Application.sharer(storedFile.getRelativePath()));
+    } else {
+      ObjectNode result = Json.newObject();
+      result.put("path", "/sharer/" + storedFile.getRelativePath());
+      return ok(result);
+    }
   }
   
   private static Result returnSaveFileWithError(Throwable t) {
