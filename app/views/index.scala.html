@@ -2,11 +2,10 @@
 
 @main("Welcome to File Sharer") {
 
-  <form action="/file-upload"
-        method="post"
-        enctype="multipart/form-data"
-        class="dropzone"
-        id="my-dropzone">
+  @helper.form(action = routes.Application.upload(),
+               'enctype -> "multipart/form-data",
+               'class -> "dropzone",
+               'id -> "my-dropzone") {
     <script>
       Dropzone.options.myDropzone = {
         init: function() {
@@ -23,9 +22,9 @@
       };
     </script>
     <div class="fallback">
-      <input type="file" name="file" />
-      <input type="hidden" name="fallback-mode">
+      <input type="file" name="file" /> @* name:file is defined by dropzone.js *@
+      <input type="hidden" name="@controllers.Application.FallbackModeParam">
       <input type="submit" />
     </div>
-  </form>
+  }
 }
