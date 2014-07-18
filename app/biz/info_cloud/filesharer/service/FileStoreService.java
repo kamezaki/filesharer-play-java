@@ -3,13 +3,18 @@ package biz.info_cloud.filesharer.service;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 import java.util.UUID;
+
+import play.Logger;
 
 import com.google.common.io.Files;
 
 public class FileStoreService {
+  private static final String DirectoryFormat = "yyyyMMdd";
   private String storeTopDirName;
 
   public FileStoreService(final String topDirName) {
@@ -49,8 +54,69 @@ public class FileStoreService {
   
   public String getStoreRelativeDirectory() {
     Calendar cal = Calendar.getInstance();
-    SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd", Locale.US);
+    return getStoreRelativeDirectory(cal);
+  }
+  
+  public String getStoreRelativeDirectory(Calendar cal) {
+    SimpleDateFormat format = new SimpleDateFormat(DirectoryFormat, Locale.US);
     return format.format(cal.getTime());
+  }
+  
+  public void deleteFiles() {
+    Logger.info(String.format("Delete shared files start [%s]", new Date().toString()));
+    
+    File topDir = new File(storeTopDirName);
+    if (!topDir.exists() || !topDir.isDirectory()) {
+      Logger.debug(String.format("Directory [%s] not found" , storeTopDirName));
+      return;
+    }
+    
+    File[] list = topDir.listFiles((file, name) -> file.isDirectory());
+    if (list == null || list.length < 1) {
+      Logger.debug(
+          String.format("could not find any directory in %s", storeTopDirName));
+      return;
+    }
+    int sum = 
+    Arrays.stream(list)
+          .parallel()
+          .filter(f -> isDeleteTarget(f))
+          .mapToInt(f -> deleteFile(f))
+          .sum();
+    Logger.info(String.format(
+        "Delete shared files finished [%s] %d files deleted", new Date().toString(), sum));
+  }
+  
+  private int deleteFile(File file) {
+    if (file.isDirectory()) {
+      int num = 0;
+      File[] list = file.listFiles();
+      if (list != null && list.length > 0) {
+        num = Arrays.stream(list)
+                    .parallel()
+                    .mapToInt(f -> deleteFile(f))
+                    .sum();
+      }
+      file.delete();
+      return num;
+    } else {
+      file.delete();
+      return 1;
+    }
+  }
+  
+  private boolean isDeleteTarget(File dir) {
+    if (!dir.isDirectory()) {
+      return false;
+    }
+
+    Calendar cal = Calendar.getInstance();
+    cal.add(Calendar.DATE, -7);
+    String oldestKeepDirectoryName = getStoreRelativeDirectory(cal);
+    if (dir.getName().compareTo(oldestKeepDirectoryName) < 0) {
+      return true;
+    }
+    return false;
   }
   
   public static class StoredFile {
