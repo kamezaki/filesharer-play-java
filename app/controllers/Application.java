@@ -35,7 +35,7 @@ public class Application extends Controller {
   private static MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();
   
   public static Result index() {
-    return ok(index.render("Your new application is ready."));
+    return ok(index.render());
   }
   
   
@@ -73,11 +73,11 @@ public class Application extends Controller {
       final Request request) throws IOException {
     MultipartFormData body = request().body().asMultipartFormData();
     if (body == null) {
-      throw new IOException("missing mutipart body");
+      throw new MissingFileException("missing mutipart body");
     }
     FilePart uploadFile = body.getFile(FilePartParam);
     if (uploadFile == null) {
-      throw new IOException("missing upload file");
+      throw new MissingFileException("missing upload file");
     }
     Map<String, String[]> queryMap = body.asFormUrlEncoded();
     boolean isFallback = false;
@@ -109,6 +109,9 @@ public class Application extends Controller {
   }
   
   private static Result returnSaveFileWithError(Throwable t) {
+    if (t instanceof MissingFileException) {
+      return redirect(controllers.routes.Application.index());
+    }
     return badRequest(t.getMessage());
   }
   
@@ -116,5 +119,21 @@ public class Application extends Controller {
     return Promise.promise(() -> saveFile(request()))
                   .map(path -> returnSaveFile(path))
                   .recover(t -> returnSaveFileWithError(t));
+  }
+  
+  public static class MissingFileException extends IOException {
+    private static final long serialVersionUID = -6916009604118436445L;
+
+    public MissingFileException(String message, Throwable cause) {
+      super(message, cause);
+    }
+
+    public MissingFileException(String message) {
+      super(message);
+    }
+
+    public MissingFileException(Throwable cause) {
+      super(cause);
+    }
   }
 }
