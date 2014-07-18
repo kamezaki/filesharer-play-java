@@ -4,10 +4,14 @@ package controllers;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.activation.MimetypesFileTypeMap;
 
+import org.mozilla.universalchardet.UniversalDetector;
+
+import play.Logger;
 import play.libs.F;
 import play.libs.F.Promise;
 import play.libs.F.Tuple;
@@ -53,7 +57,40 @@ public class Application extends Controller {
       throw new FileNotFoundException(
           String.format("%s is not found", file.getRelativePath()));
     }
+    String lowerContentType = contentType.toLowerCase(Locale.US);
+    if (lowerContentType.startsWith("text/") ||
+        lowerContentType.endsWith("/json") ||
+        lowerContentType.endsWith("/xml")) {
+      String encoding = detectCharacterEncoding(file.getAbsolutePath());
+      if (encoding != null && encoding.length() > 0) {
+        contentType = String.format("%s; charset=%s", contentType, encoding);
+      }
+    }
     return ok(new FileInputStream(file.getAbsolutePath())).as(contentType);
+  }
+  
+  private static String detectCharacterEncoding(String path) {
+    String encoding = null;
+    UniversalDetector detector = null;
+    try (FileInputStream fis = new java.io.FileInputStream(path)) {
+
+      byte[] buf = new byte[4096];
+      detector = new UniversalDetector(null);
+      int nread;
+      while ((nread = fis.read(buf)) > 0 && !detector.isDone()) {
+        detector.handleData(buf, 0, nread);
+      }
+      detector.dataEnd();
+
+      encoding = detector.getDetectedCharset();
+    } catch (IOException e) {
+      Logger.error("error on detect encoding", e);
+    } finally {
+      if (detector != null) {
+        detector.reset();
+      }
+    }
+    return encoding;
   }
   
   private static Result returnSharerWithError(Throwable t) {
