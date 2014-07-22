@@ -10,5 +10,6 @@ libraryDependencies ++= Seq(
   javaJdbc,
   javaEbean,
   cache,
-  javaWs
+  javaWs,
+  "com.googlecode.juniversalchardet" % "juniversalchardet" % "1.0.3"
 )
