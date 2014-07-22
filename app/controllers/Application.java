@@ -42,7 +42,6 @@ public class Application extends Controller {
     return ok(index.render());
   }
   
-  
   private static StoredFile getFile(String filename) {
     String folder = config.getString(ConfigStorePath);
     FileStoreService service = new FileStoreService(folder);
@@ -59,8 +58,7 @@ public class Application extends Controller {
     }
     String lowerContentType = contentType.toLowerCase(Locale.US);
     if (lowerContentType.startsWith("text/") ||
-        lowerContentType.endsWith("/json") ||
-        lowerContentType.endsWith("/xml")) {
+        lowerContentType.endsWith("/json")) {
       String encoding = detectCharacterEncoding(file.getAbsolutePath());
       if (encoding != null && encoding.length() > 0) {
         contentType = String.format("%s; charset=%s", contentType, encoding);

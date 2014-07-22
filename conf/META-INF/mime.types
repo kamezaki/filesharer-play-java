@@ -2,7 +2,7 @@
 text/plain text txt log TXT LOG
 text/html html htm HTM
 application/json json JSON
-application/xml xml XML
+#application/xml xml XML
 #
 image/jpeg jpeg jpg JPG
 image/gif gif GIF
