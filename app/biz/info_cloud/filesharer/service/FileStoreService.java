@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.UUID;
 
+import models.ShareFileEntity;
 import play.Logger;
 
 import com.google.common.io.Files;
@@ -42,6 +43,11 @@ public class FileStoreService {
     String saveFilename = UUID.randomUUID().toString() + ext;
     File writeFile = new File(parentDir, saveFilename);
     Files.copy(fromFile, writeFile);
+    
+    ShareFileEntity entity = new ShareFileEntity();
+    entity.filePath = saveFilename;
+    entity.originalFilename = fromFilename;
+    entity.save();
     
     return new StoredFile(
         storeTopDirName,
@@ -138,6 +144,15 @@ public class FileStoreService {
     
     public boolean exists() {
       return storedFile.exists();
+    }
+    
+    public String getOriginalFilename() {
+      String path = relativePath.substring(relativePath.lastIndexOf("/") + 1);
+      ShareFileEntity entity = ShareFileEntity.find.byId(path);
+      if (entity == null) {
+        Logger.debug(String.format("Not found in database %s", relativePath));
+      }
+      return (entity != null) ? entity.originalFilename : relativePath;
     }
   }
 }

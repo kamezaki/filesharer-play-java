@@ -50,6 +50,8 @@ public class Application extends Controller {
   
   private static Result returnSharer(StoredFile file)
       throws FileNotFoundException {
+    // TODO remove debug message
+    Logger.debug(String.format("original : %s", file.getOriginalFilename()));
     String contentType = mimeTypesMap.getContentType(
         file.getAbsolutePath());
     if (!file.exists()) {
