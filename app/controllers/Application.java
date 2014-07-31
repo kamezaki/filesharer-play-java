@@ -1,14 +1,16 @@
 package controllers;
 
-
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Locale;
 import java.util.Map;
 
 import javax.activation.MimetypesFileTypeMap;
 
+import org.apache.commons.io.FileUtils;
 import org.mozilla.universalchardet.UniversalDetector;
 
 import play.Logger;
@@ -22,6 +24,9 @@ import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Http.Request;
 import play.mvc.Result;
 import views.html.index;
+import views.html.showimage;
+import views.html.showother;
+import views.html.showtext;
 import biz.info_cloud.filesharer.service.FileStoreService;
 import biz.info_cloud.filesharer.service.FileStoreService.StoredFile;
 
@@ -34,6 +39,7 @@ public class Application extends Controller {
   public static final String FilePartParam = "file";
   public static final String FallbackModeParam = "fallback-mode";
   public static final String JsonPathParam = "path";
+  public static final String DirectParam = "direct";
   
   private static Config config = ConfigFactory.load();
   private static MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();
@@ -49,27 +55,22 @@ public class Application extends Controller {
   }
   
   private static Result returnSharer(StoredFile file)
-      throws FileNotFoundException {
-    // TODO remove debug message
-    Logger.debug(String.format("original : %s", file.getOriginalFilename()));
-    String contentType = mimeTypesMap.getContentType(
-        file.getAbsolutePath());
+      throws FileNotFoundException, UnsupportedEncodingException {
     if (!file.exists()) {
       throw new FileNotFoundException(
           String.format("%s is not found", file.getRelativePath()));
     }
-    String lowerContentType = contentType.toLowerCase(Locale.US);
-    if (lowerContentType.startsWith("text/") ||
-        lowerContentType.endsWith("/json")) {
-      String encoding = detectCharacterEncoding(file.getAbsolutePath());
-      if (encoding != null && encoding.length() > 0) {
-        contentType = String.format("%s; charset=%s", contentType, encoding);
-      }
+    
+    String contentType = mimeTypesMap.getContentType(
+        file.getAbsolutePath());
+    if (request().getQueryString(DirectParam) == null) {
+      response().setHeader("Content-Disposition",
+          String.format("attachment; filename=%s", file.getOriginalFilename()));
     }
     return ok(new FileInputStream(file.getAbsolutePath())).as(contentType);
   }
   
-  private static String detectCharacterEncoding(String path) {
+  private static String detectFileEncoding(String path) {
     String encoding = null;
     UniversalDetector detector = null;
     try (FileInputStream fis = new java.io.FileInputStream(path)) {
@@ -106,6 +107,41 @@ public class Application extends Controller {
                   .recover(t -> returnSharerWithError(t));
   }
   
+  private static Result returnShow(StoredFile file)
+      throws IOException {
+    if (!file.exists()) {
+      throw new FileNotFoundException(
+          String.format("%s is not found", file.getRelativePath()));
+    }
+    
+    String contentType = mimeTypesMap.getContentType(
+        file.getAbsolutePath());
+    String lowerContentType = contentType.toLowerCase(Locale.US);
+    if (lowerContentType.startsWith("text/") ||
+        lowerContentType.endsWith("/json")) {
+      String encoding = detectFileEncoding(file.getAbsolutePath());
+      if (encoding != null && encoding.length() > 0) {
+        contentType = String.format("%s; charset=%s", contentType, encoding);
+      }
+      File textFile = new File(file.getAbsolutePath());
+      String textBody = FileUtils.readFileToString(textFile, encoding);
+      return ok(showtext.render(
+          file.getRelativePath(), file.getOriginalFilename(), textBody));
+    } else if (lowerContentType.startsWith("image/")) {
+      return ok(showimage.render(
+          file.getRelativePath(), file.getOriginalFilename()));
+    } else {
+      return ok(showother.render(
+          file.getRelativePath(), file.getOriginalFilename()));
+    }
+  }
+  
+  public static Promise<Result> show(String filename) {
+    return Promise.promise(() -> getFile(filename))
+        .map(f -> returnShow(f))
+        .recover(t -> returnSharerWithError(t));
+  }
+  
   private static Tuple<StoredFile, Boolean> saveFile(
       final Request request) throws IOException {
     MultipartFormData body = request().body().asMultipartFormData();
@@ -135,10 +171,10 @@ public class Application extends Controller {
     boolean isFallback = tuple._2.booleanValue();
     if (isFallback) {
       return redirect(
-          controllers.routes.Application.sharer(storedFile.getRelativePath()));
+          controllers.routes.Application.show(storedFile.getRelativePath()));
     } else {
       ObjectNode result = Json.newObject();
-      String sharedPath = controllers.routes.Application.sharer(
+      String sharedPath = controllers.routes.Application.show(
           storedFile.getRelativePath()).toString();
       result.put(JsonPathParam, sharedPath);
       return ok(result);
