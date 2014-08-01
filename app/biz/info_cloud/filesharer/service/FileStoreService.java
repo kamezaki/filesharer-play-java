@@ -107,6 +107,10 @@ public class FileStoreService {
       return num;
     } else {
       file.delete();
+      ShareFileEntity entity = ShareFileEntity.find.byId(file.getName());
+      if (entity != null) {
+        entity.delete();
+      }
       return 1;
     }
   }
