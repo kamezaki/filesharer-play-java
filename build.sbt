@@ -11,5 +11,6 @@ libraryDependencies ++= Seq(
   javaEbean,
   cache,
   javaWs,
-  "com.googlecode.juniversalchardet" % "juniversalchardet" % "1.0.3"
+  "com.googlecode.juniversalchardet" % "juniversalchardet" % "1.0.3",
+  "commons-io" % "commons-io" % "2.4"
 )
