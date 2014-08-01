@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Locale;
 import java.util.Map;
 
@@ -39,7 +40,7 @@ public class Application extends Controller {
   public static final String FilePartParam = "file";
   public static final String FallbackModeParam = "fallback-mode";
   public static final String JsonPathParam = "path";
-  public static final String DirectParam = "direct";
+  public static final String DownloadParam = "download";
   
   private static Config config = ConfigFactory.load();
   private static MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();
@@ -63,10 +64,22 @@ public class Application extends Controller {
     
     String contentType = mimeTypesMap.getContentType(
         file.getAbsolutePath());
-    if (request().getQueryString(DirectParam) == null) {
-      response().setHeader("Content-Disposition",
-          String.format("attachment; filename=%s", file.getOriginalFilename()));
+    
+    SupportContentType type = getSupportContentType(contentType);
+    if (type == SupportContentType.TEXT) {
+      String encoding = detectFileEncoding(file.getAbsolutePath());
+      if (encoding != null && encoding.length() > 0) {
+        contentType = String.format("%s; charset=%s", contentType, encoding);
+      }
     }
+    
+    String mode = "inline";
+    if (request().getQueryString(DownloadParam) != null) {
+      mode = "attachment";
+    }
+    String filename = URLEncoder.encode(file.getOriginalFilename(), "UTF-8");
+    response().setHeader("Content-Disposition",
+        String.format("%s; filename*=UTF-8\'\'%s", mode, filename));
     return ok(new FileInputStream(file.getAbsolutePath())).as(contentType);
   }
   
@@ -116,24 +129,38 @@ public class Application extends Controller {
     
     String contentType = mimeTypesMap.getContentType(
         file.getAbsolutePath());
-    String lowerContentType = contentType.toLowerCase(Locale.US);
-    if (lowerContentType.startsWith("text/") ||
-        lowerContentType.endsWith("/json")) {
+    SupportContentType type = getSupportContentType(contentType);
+    switch (type) {
+    case TEXT:
       String encoding = detectFileEncoding(file.getAbsolutePath());
-      if (encoding != null && encoding.length() > 0) {
-        contentType = String.format("%s; charset=%s", contentType, encoding);
-      }
+//      if (encoding != null && encoding.length() > 0) {
+//        contentType = String.format("%s; charset=%s", contentType, encoding);
+//      }
       File textFile = new File(file.getAbsolutePath());
       String textBody = FileUtils.readFileToString(textFile, encoding);
       return ok(showtext.render(
           file.getRelativePath(), file.getOriginalFilename(), textBody));
-    } else if (lowerContentType.startsWith("image/")) {
+    case IMAGE:
       return ok(showimage.render(
           file.getRelativePath(), file.getOriginalFilename()));
-    } else {
+    case OTHER:
+    default:
       return ok(showother.render(
           file.getRelativePath(), file.getOriginalFilename()));
     }
+  }
+  
+  private static SupportContentType getSupportContentType(String contentType) {
+    String lowerContentType = contentType.toLowerCase(Locale.US);
+    if (lowerContentType.startsWith("text/") ||
+        lowerContentType.endsWith("/json")) {
+      return SupportContentType.TEXT;
+    } else if (lowerContentType.startsWith("image/")) {
+      return SupportContentType.IMAGE;
+    } else {
+      return SupportContentType.OTHER;
+    }
+    
   }
   
   public static Promise<Result> show(String filename) {
@@ -208,5 +235,9 @@ public class Application extends Controller {
     public MissingFileException(Throwable cause) {
       super(cause);
     }
+  }
+  
+  public enum SupportContentType {
+    TEXT, IMAGE, OTHER
   }
 }
