@@ -1,11 +1,10 @@
-#
+# Text content type (text/*)
 text/plain text txt log TXT LOG
 text/html html htm HTM
-application/json json JSON
-#application/xml xml XML
-#
+text/css css CSS
+text/json json JSON
+text/xml xml XML
+# Image content type (image/*)
 image/jpeg jpeg jpg JPG
 image/gif gif GIF
 image/png png PNG
-#
-application/pdf pdf PDF
