@@ -19,6 +19,12 @@ public class FileStoreService {
   private String storeTopDirName;
 
   public FileStoreService(final String topDirName) {
+    if (topDirName == null) {
+      throw new NullPointerException("argument must not be null");
+    }
+    if (topDirName.length() < 1) {
+      throw new IllegalArgumentException("arugment must not be emtpy string");
+    }
     this.storeTopDirName = topDirName;
   }
   
