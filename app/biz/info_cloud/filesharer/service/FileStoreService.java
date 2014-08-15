@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import models.ShareFileEntity;
 import play.Logger;
+import biz.info_cloud.filesharer.LocalConfig;
 
 import com.google.common.io.Files;
 
@@ -126,8 +127,9 @@ public class FileStoreService {
       return false;
     }
 
+    int keepDate = LocalConfig.getKeepDurationInDays();
     Calendar cal = Calendar.getInstance();
-    cal.add(Calendar.DATE, -7);
+    cal.add(Calendar.DATE, -keepDate);
     String oldestKeepDirectoryName = getStoreRelativeDirectory(cal);
     if (dir.getName().compareTo(oldestKeepDirectoryName) < 0) {
       return true;

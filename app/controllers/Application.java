@@ -25,22 +25,19 @@ import views.html.index;
 import views.html.showimage;
 import views.html.showother;
 import views.html.showtext;
+import biz.info_cloud.filesharer.LocalConfig;
 import biz.info_cloud.filesharer.service.FileStoreService;
 import biz.info_cloud.filesharer.service.FileStoreService.StoredFile;
 import biz.info_cloud.web.utils.ContentsUtils;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 
 public class Application extends Controller {
-  public static final String ConfigStorePath = "filesharer.store.path";
   public static final String FilePartParam = "file";
   public static final String FallbackModeParam = "fallback-mode";
   public static final String JsonPathParam = "path";
   public static final String DownloadParam = "download";
   
-  private static Config config = ConfigFactory.load();
   private static MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();
   
   public static Result index() {
@@ -66,7 +63,7 @@ public class Application extends Controller {
   }
   
   private static StoredFile getFile(String filename) {
-    String folder = config.getString(ConfigStorePath);
+    String folder = LocalConfig.getStorePath();
     FileStoreService service = new FileStoreService(folder);
     return service.getStoredFile(filename);
   }
@@ -144,7 +141,7 @@ public class Application extends Controller {
       isFallback = true;
     }
     
-    String folder = config.getString(ConfigStorePath);
+    String folder = LocalConfig.getStorePath();
     FileStoreService service = new FileStoreService(folder);
     StoredFile storedFile = service.saveFile(
         uploadFile.getFile(), uploadFile.getFilename());
