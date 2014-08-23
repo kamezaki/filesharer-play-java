@@ -3,6 +3,7 @@ text/plain text txt log TXT LOG
 text/html html htm HTM
 text/css css CSS
 text/json json JSON
+text/js js JS
 text/xml xml XML
 # Image content type (image/*)
 image/jpeg jpeg jpg JPG

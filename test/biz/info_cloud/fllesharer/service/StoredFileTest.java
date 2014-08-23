@@ -22,10 +22,9 @@ public class StoredFileTest {
   @Test
   public void relativeFile() {
     String relativePath = "relativeFile.txt";
-    StoredFile storedFile =
-        new StoredFile(temporaryFolder.getRoot().getAbsolutePath(), relativePath);
+    StoredFile storedFile = new StoredFile(relativePath);
     
-    assertThat(storedFile.getRelativePath())
+    assertThat(storedFile.getKeyPath())
         .isNotNull()
         .isEqualTo(relativePath);
   }
@@ -33,43 +32,17 @@ public class StoredFileTest {
   @Test
   public void relativeFolderAndFile() {
     String relativePath = "relativeFolder/relativeFile.txt";
-    StoredFile storedFile =
-        new StoredFile(temporaryFolder.getRoot().getAbsolutePath(), relativePath);
+    StoredFile storedFile = new StoredFile(relativePath);
     
-    assertThat(storedFile.getRelativePath())
+    assertThat(storedFile.getKeyPath())
         .isNotNull()
         .isEqualTo(relativePath);
   }
   
   @Test
-  public void absolutePathByFile() {
-    String relativePath = "relativeFile.txt";
-    StoredFile storedFile =
-        new StoredFile(temporaryFolder.getRoot().getAbsolutePath(), relativePath);
-    
-    File expectedFile = new File(temporaryFolder.getRoot(), relativePath);
-    assertThat(storedFile.getAbsolutePath())
-        .isNotNull()
-        .isEqualTo(expectedFile.getAbsolutePath());
-  }
-  
-  @Test
-  public void absolutePathByFolderAndFile() {
-    String relativePath = "relativeFolder/relativeFile.txt";
-    StoredFile storedFile =
-        new StoredFile(temporaryFolder.getRoot().getAbsolutePath(), relativePath);
-    
-    File expectedFile = new File(temporaryFolder.getRoot(), relativePath);
-    assertThat(storedFile.getAbsolutePath())
-        .isNotNull()
-        .isEqualTo(expectedFile.getAbsolutePath());
-  }
-  
-  @Test
   public void existsByNonExistingFile() {
     String relativePath = "relativeFile.txt";
-    StoredFile storedFile =
-        new StoredFile(temporaryFolder.getRoot().getAbsolutePath(), relativePath);
+    StoredFile storedFile = new StoredFile(relativePath);
     
     assertThat(storedFile.exists()).isEqualTo(false);
   }
@@ -78,8 +51,7 @@ public class StoredFileTest {
   public void existsByExistingFile() throws Exception {
     String relativePath = "relativeFile.txt";
     temporaryFolder.newFile(relativePath);
-    StoredFile storedFile =
-        new StoredFile(temporaryFolder.getRoot().getAbsolutePath(), relativePath);
+    StoredFile storedFile = new StoredFile(relativePath);
     
     assertThat(storedFile.exists()).isEqualTo(true);
   }
@@ -87,8 +59,7 @@ public class StoredFileTest {
   @Test
   public void existsByNonExistentFolderAndFile() {
     String relativePath = "relativeFolder/relativeFile.txt";
-    StoredFile storedFile =
-        new StoredFile(temporaryFolder.getRoot().getAbsolutePath(), relativePath);
+    StoredFile storedFile = new StoredFile(relativePath);
     
     assertThat(storedFile.exists()).isEqualTo(false);
   }
@@ -103,8 +74,7 @@ public class StoredFileTest {
     File relativeFile = new File(relativeFolder, filename);
     relativeFile.createNewFile();
     
-    StoredFile storedFile =
-        new StoredFile(temporaryFolder.getRoot().getAbsolutePath(), relativePath);
+    StoredFile storedFile = new StoredFile(relativePath);
     
     assertThat(storedFile.exists()).isEqualTo(true);
   }
@@ -119,8 +89,7 @@ public class StoredFileTest {
     File relativeFile = new File(relativeFolder, filename);
     relativeFile.createNewFile();
     
-    StoredFile storedFile =
-        new StoredFile(temporaryFolder.getRoot().getAbsolutePath(), relativePath);
+    StoredFile storedFile = new StoredFile(relativePath);
 
     assertThat(storedFile.getOriginalFilename())
         .isNotNull()
@@ -143,8 +112,7 @@ public class StoredFileTest {
     entity.originalFilename = originalName;
     entity.save();
     
-    StoredFile storedFile =
-        new StoredFile(temporaryFolder.getRoot().getAbsolutePath(), relativePath);
+    StoredFile storedFile = new StoredFile(relativePath);
 
     assertThat(storedFile.getOriginalFilename())
         .isNotNull()
