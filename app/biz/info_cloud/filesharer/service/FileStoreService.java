@@ -3,8 +3,12 @@ package biz.info_cloud.filesharer.service;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import models.ShareFileEntity;
 import play.Logger;
@@ -19,7 +23,7 @@ public class FileStoreService {
     int index = fromFilename.lastIndexOf(".");
     String ext = "";
     if (index >= 0) {
-      ext = fromFilename.substring(index);
+      ext = fromFilename.substring(index).toLowerCase();
     }
     
     String saveFilename = UUID.randomUUID().toString() + ext;
@@ -41,65 +45,30 @@ public class FileStoreService {
   
   public void deleteFiles() {
     Logger.info(String.format("Delete shared files start [%s]", new Date().toString()));
+
+    StorageService storageService = getStorageService();
+    int keepDate = LocalConfig.getKeepDurationInDays();
+    LocalDateTime deleteDate = LocalDateTime.now().minusDays(keepDate);
+    List<ShareFileEntity> targetList =
+        ShareFileEntity.find.where()
+                            .le("createDate", Timestamp.valueOf(deleteDate))
+                            .findList();
+    Consumer<ShareFileEntity> deleteFileAction =
+        target -> {
+          try {
+            storageService.delete(target.storageFilename);
+          } catch (IOException e) {
+            Logger.debug(e.toString());
+          }
+        };
     
-//    File topDir = new File(storeTopDirName);
-//    if (!topDir.exists() || !topDir.isDirectory()) {
-//      Logger.debug(String.format("Directory [%s] not found" , storeTopDirName));
-//      return;
-//    }
+    targetList.stream()
+              .peek(deleteFileAction)
+              .forEach(target -> target.delete());
     
-//    File[] list = topDir.listFiles((file, name) -> file.isDirectory());
-//    if (list == null || list.length < 1) {
-//      Logger.debug(
-//          String.format("could not find any directory in %s", storeTopDirName));
-//      return;
-//    }
-//    int sum = 
-//    Arrays.stream(list)
-//          .parallel()
-//          .filter(f -> isDeleteTarget(f))
-//          .mapToInt(f -> deleteFile(f))
-//          .sum();
-//    Logger.info(String.format(
-//        "Delete shared files finished [%s] %d files deleted", new Date().toString(), sum));
+    // TODO
+    // garbage collection of storage.
   }
-  
-//  private int deleteFile(File file) {
-//    if (file.isDirectory()) {
-//      int num = 0;
-//      File[] list = file.listFiles();
-//      if (list != null && list.length > 0) {
-//        num = Arrays.stream(list)
-//                    .parallel()
-//                    .mapToInt(f -> deleteFile(f))
-//                    .sum();
-//      }
-//      file.delete();
-//      return num;
-//    } else {
-//      file.delete();
-//      ShareFileEntity entity = ShareFileEntity.find.byId(file.getName());
-//      if (entity != null) {
-//        entity.delete();
-//      }
-//      return 1;
-//    }
-//  }
-  
-//  private boolean isDeleteTarget(File dir) {
-//    if (!dir.isDirectory()) {
-//      return false;
-//    }
-//
-//    int keepDate = LocalConfig.getKeepDurationInDays();
-//    Calendar cal = Calendar.getInstance();
-//    cal.add(Calendar.DATE, -keepDate);
-//    String oldestKeepDirectoryName = getStoreRelativeDirectory(cal);
-//    if (dir.getName().compareTo(oldestKeepDirectoryName) < 0) {
-//      return true;
-//    }
-//    return false;
-//  }
   
   private static StorageService getStorageService() {
     return StorageServiceFactory.createStorageService(LocalConfig.getStorageType());

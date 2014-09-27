@@ -1,6 +1,6 @@
 package models;
 
-import java.util.Date;
+import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -24,7 +24,7 @@ public class ShareFileEntity extends Model {
   public String storageFilename;
   
   @CreatedTimestamp
-  public Date createDate;
+  public Timestamp createDate;
   
   @Override
   public void delete() {

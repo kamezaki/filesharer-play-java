@@ -26,6 +26,7 @@ public class LocalConfig {
     return getIntValue("filesharer.scheduler.interval", n -> n > 0, 22);
   }
   
+  
   /**
    * Get keep duration in days
    * @return days
