@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -44,7 +43,7 @@ public class FileStoreService {
   }
   
   public void deleteFiles() {
-    Logger.info(String.format("Delete shared files start [%s]", new Date().toString()));
+    Logger.info(String.format("Delete shared files started [%s]", LocalDateTime.now().toString()));
 
     StorageService storageService = getStorageService();
     int keepDate = LocalConfig.getKeepDurationInDays();
@@ -68,6 +67,8 @@ public class FileStoreService {
     
     // TODO
     // garbage collection of storage.
+    
+    Logger.info(String.format("Delete shared files finshed [%s]", LocalDateTime.now().toString()));
   }
   
   private static StorageService getStorageService() {
