@@ -1,7 +1,6 @@
 package biz.info_cloud.fllesharer.service;
 
 import static org.fest.assertions.Assertions.assertThat;
-import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,12 +38,6 @@ public class FileStoreServiceTest {
     }
   }
   
-  @Test(expected=IllegalArgumentException.class)
-  public void consructWithEmtpyStringArgument() {
-    new FileStoreService();
-    fail("Constructor should throw exeption when argument is empty string");
-  }
-  
   @Test
   public void constructWithStringPath() {
     FileStoreService service = new FileStoreService();
@@ -60,10 +53,42 @@ public class FileStoreServiceTest {
     StoredFile storedFile = service.saveFile(sourceFile, sourceFile.getName());
     
     assertThat(storedFile).isNotNull();
-    assertThat(storedFile.getOriginalFilename()).isNotNull()
-                                                .isEqualTo(sourceFile.getName());
+    assertThat(storedFile.getOriginalFilename())
+      .isNotNull()
+      .isEqualTo(sourceFile.getName());
     
     String relativePath = storedFile.getKeyPath();
+    int index = relativePath.lastIndexOf('/');
+    String uuid = relativePath.substring(index >= 0 ? index + 1 : 0);
+    ShareFileEntity entity = ShareFileEntity.find.byId(uuid);
+    assertThat(entity).isNotNull();
+  }
+  
+  @Test
+  public void saveFileWithUpperCaseExtension() throws Exception {
+    FileStoreService service = new FileStoreService();
+    int position = sourceFile.getName().lastIndexOf(".");
+    String name = sourceFile.getName();
+    String ext = "";
+    if (position >= 0) {
+      ext = name.substring(position);
+      name = name.substring(0, position) + ext.toUpperCase();
+    }
+    StoredFile storedFile = service.saveFile(sourceFile, name);
+    
+    assertThat(storedFile).isNotNull();
+    assertThat(storedFile.getOriginalFilename())
+      .isNotNull()
+      .isEqualTo(name);
+    
+    String relativePath = storedFile.getKeyPath();
+    position = relativePath.lastIndexOf(".");
+    // should have extension
+    assertThat(position).isGreaterThanOrEqualTo(0);
+    // extension should be lower case
+    assertThat(relativePath.substring(position))
+      .isEqualTo(ext);
+    
     int index = relativePath.lastIndexOf('/');
     String uuid = relativePath.substring(index >= 0 ? index + 1 : 0);
     ShareFileEntity entity = ShareFileEntity.find.byId(uuid);

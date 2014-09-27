@@ -2,6 +2,7 @@ import static org.fest.assertions.Assertions.assertThat;
 import static play.test.Helpers.contentAsString;
 import static play.test.Helpers.contentType;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import play.twirl.api.Content;
@@ -21,6 +22,7 @@ public class ApplicationTest {
     assertThat(a).isEqualTo(2);
   }
 
+  @Ignore
   @Test
   public void renderTemplate() {
     Content html = views.html.index.render();
