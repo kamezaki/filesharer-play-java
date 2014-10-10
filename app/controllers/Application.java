@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.activation.MimetypesFileTypeMap;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 
 import play.libs.F;
 import play.libs.F.Promise;
@@ -105,10 +106,11 @@ public class Application extends Controller {
     case TEXT:
       String encoding = ContentsUtils.detectEncoding(
           file.getInputStream());
+      String body = StringEscapeUtils.escapeXml(IOUtils.toString(file.getInputStream(), encoding));
       return ok(showtext.render(
           file.getKeyPath(),
           file.getOriginalFilename(),
-          IOUtils.toString(file.getInputStream(), encoding)));
+          body));
     case IMAGE:
       return ok(showimage.render(
           file.getKeyPath(), file.getOriginalFilename()));
