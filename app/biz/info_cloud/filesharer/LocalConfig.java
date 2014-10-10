@@ -1,6 +1,7 @@
 package biz.info_cloud.filesharer;
 
 import com.typesafe.config.Config;
+import com.typesafe.config.ConfigException;
 import com.typesafe.config.ConfigFactory;
 
 public class LocalConfig {
@@ -25,12 +26,24 @@ public class LocalConfig {
     return getIntValue("filesharer.scheduler.interval", n -> n > 0, 22);
   }
   
+  
   /**
    * Get keep duration in days
    * @return days
    */
   public static int getKeepDurationInDays() {
-    int value = getIntValue("filesharer.keep.duration", n -> n > 0, 7);
+    return getIntValue("filesharer.keep.duration", n -> n > 0, 7);
+  }
+  
+  public static String getStorageType() {
+    return getStringValue("filesharer.store.type", "");
+  }
+  
+  private static String getStringValue(String key, String defaultValue) {
+    String value = defaultValue;
+    if (config.hasPath(key)) {
+      value = config.getString(key);
+    }
     return value;
   }
   

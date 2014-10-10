@@ -1,14 +1,14 @@
 package models;
 
-import java.util.Date;
+import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
-import com.avaje.ebean.annotation.CreatedTimestamp;
-
 import play.db.ebean.Model;
+
+import com.avaje.ebean.annotation.CreatedTimestamp;
 
 @Entity
 public class ShareFileEntity extends Model {
@@ -20,9 +20,18 @@ public class ShareFileEntity extends Model {
   @Column(length=4096)
   public String originalFilename;
   
-  @CreatedTimestamp
-  public Date createDate;
+  @Column(length=4096)
+  public String storageFilename;
   
+  @CreatedTimestamp
+  public Timestamp createDate;
+  
+  @Override
+  public void delete() {
+    super.delete();
+  }
+
+  @Override
   public String toString() {
     return filePath;
   }

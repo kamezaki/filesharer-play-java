@@ -14,10 +14,9 @@ public class Global extends GlobalSettings {
   public void onStart(Application application) {
     super.onStart(application);
     Logger.info("start application");
-    String folder = LocalConfig.getStorePath();
     int interval = LocalConfig.getScheduleFrequencyInHours();
     
-    FileStoreService service = new FileStoreService(folder);
+    FileStoreService service = new FileStoreService();
     Akka.system().scheduler().schedule(
         Duration.create(0, TimeUnit.MILLISECONDS),  // Initial delay 0 milliseconds.
         Duration.create(interval, TimeUnit.HOURS),  // Frequency

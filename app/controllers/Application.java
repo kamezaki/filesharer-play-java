@@ -1,7 +1,5 @@
 package controllers;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -10,7 +8,8 @@ import java.util.Map;
 
 import javax.activation.MimetypesFileTypeMap;
 
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 
 import play.libs.F;
 import play.libs.F.Promise;
@@ -25,7 +24,6 @@ import views.html.index;
 import views.html.showimage;
 import views.html.showother;
 import views.html.showtext;
-import biz.info_cloud.filesharer.LocalConfig;
 import biz.info_cloud.filesharer.service.FileStoreService;
 import biz.info_cloud.filesharer.service.FileStoreService.StoredFile;
 import biz.info_cloud.web.utils.ContentsUtils;
@@ -63,8 +61,7 @@ public class Application extends Controller {
   }
   
   private static StoredFile getFile(String filename) {
-    String folder = LocalConfig.getStorePath();
-    FileStoreService service = new FileStoreService(folder);
+    FileStoreService service = new FileStoreService();
     return service.getStoredFile(filename);
   }
   
@@ -72,14 +69,14 @@ public class Application extends Controller {
       throws IOException {
     if (!file.exists()) {
       throw new FileNotFoundException(
-          String.format("%s is not found", file.getRelativePath()));
+          String.format("%s is not found", file.getKeyPath()));
     }
     
     String contentType = mimeTypesMap.getContentType(
-        file.getAbsolutePath());
+        file.getOriginalFilename());
     
     if (getShowType(contentType) == ShowType.TEXT) {
-      String encoding = ContentsUtils.detectFileEncoding(file.getAbsolutePath());
+      String encoding = ContentsUtils.detectEncoding(file.getInputStream());
       if (encoding != null && encoding.length() > 0) {
         contentType = String.format("%s; charset=%s", contentType, encoding);
       }
@@ -92,7 +89,7 @@ public class Application extends Controller {
     String filename = URLEncoder.encode(file.getOriginalFilename(), "UTF-8");
     response().setHeader("Content-Disposition",
         String.format("%s; filename*=UTF-8\'\'%s", mode, filename));
-    return ok(new FileInputStream(file.getAbsolutePath())).as(contentType);
+    return ok(file.getInputStream()).as(contentType);
   }
   
   
@@ -100,27 +97,27 @@ public class Application extends Controller {
       throws IOException {
     if (!file.exists()) {
       throw new FileNotFoundException(
-          String.format("%s is not found", file.getRelativePath()));
+          String.format("%s is not found", file.getKeyPath()));
     }
     
     String contentType = mimeTypesMap.getContentType(
-        file.getAbsolutePath());
+        file.getOriginalFilename());
     switch (getShowType(contentType)) {
     case TEXT:
-      String encoding = ContentsUtils.detectFileEncoding(
-          file.getAbsolutePath());
-      File textFile = new File(file.getAbsolutePath());
+      String encoding = ContentsUtils.detectEncoding(
+          file.getInputStream());
+      String body = StringEscapeUtils.escapeXml(IOUtils.toString(file.getInputStream(), encoding));
       return ok(showtext.render(
-          file.getRelativePath(),
+          file.getKeyPath(),
           file.getOriginalFilename(),
-          FileUtils.readFileToString(textFile, encoding)));
+          body));
     case IMAGE:
       return ok(showimage.render(
-          file.getRelativePath(), file.getOriginalFilename()));
+          file.getKeyPath(), file.getOriginalFilename()));
     case OTHER:
     default:
       return ok(showother.render(
-          file.getRelativePath(), file.getOriginalFilename()));
+          file.getKeyPath(), file.getOriginalFilename()));
     }
   }
   
@@ -141,8 +138,7 @@ public class Application extends Controller {
       isFallback = true;
     }
     
-    String folder = LocalConfig.getStorePath();
-    FileStoreService service = new FileStoreService(folder);
+    FileStoreService service = new FileStoreService();
     StoredFile storedFile = service.saveFile(
         uploadFile.getFile(), uploadFile.getFilename());
     return new F.Tuple<StoredFile, Boolean>(
@@ -154,11 +150,11 @@ public class Application extends Controller {
     boolean isFallback = tuple._2.booleanValue();
     if (isFallback) {
       return redirect(
-          controllers.routes.Application.show(storedFile.getRelativePath()));
+          controllers.routes.Application.show(storedFile.getKeyPath()));
     } else {
       ObjectNode result = Json.newObject();
       String sharedPath = controllers.routes.Application.show(
-          storedFile.getRelativePath()).toString();
+          storedFile.getKeyPath()).toString();
       result.put(JsonPathParam, sharedPath);
       return ok(result);
     }

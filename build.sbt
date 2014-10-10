@@ -12,5 +12,6 @@ libraryDependencies ++= Seq(
   cache,
   javaWs,
   "com.googlecode.juniversalchardet" % "juniversalchardet" % "1.0.3",
+  "com.amazonaws" % "aws-java-sdk" % "1.8.9.1",
   "commons-io" % "commons-io" % "2.4"
 )
