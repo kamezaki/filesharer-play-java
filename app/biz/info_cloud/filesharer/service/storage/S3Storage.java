@@ -32,7 +32,7 @@ public class S3Storage implements StorageService {
       checkS3Plugin();
       PutObjectRequest request =
           new PutObjectRequest(getBucket(), filename, file);
-      request.withCannedAcl(CannedAccessControlList.PublicRead);
+      request.withCannedAcl(CannedAccessControlList.Private);
       S3Plugin.amazonS3.putObject(request);
     } catch (AmazonClientException e) {
       throw new IOException(e);

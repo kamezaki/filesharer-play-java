@@ -1,5 +1,6 @@
 package plugins;
 
+import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
@@ -33,7 +34,10 @@ public class S3Plugin extends Plugin {
       AWSCredentials awsCredentials =
           new BasicAWSCredentials(accessKey, secretKey);
       amazonS3 = new AmazonS3Client(awsCredentials);
-      amazonS3.createBucket(s3Bucket);
+      if (!amazonS3.doesBucketExist(s3Bucket)) {
+        throw new AmazonClientException(
+            String.format("bucket does not exits. bucket [%s]", s3Bucket));
+      }
       Logger.info("Using S3 Bucket: " + s3Bucket);
     }
   }
