@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 
+import org.apache.commons.io.FilenameUtils;
+
 import models.ShareFileEntity;
 import play.Logger;
 import biz.info_cloud.filesharer.LocalConfig;
@@ -19,11 +21,7 @@ public class FileStoreService {
   public StoredFile saveFile(final File fromFile, final String fromFilename)
       throws IOException {
     // check extension
-    int index = fromFilename.lastIndexOf(".");
-    String ext = "";
-    if (index >= 0) {
-      ext = fromFilename.substring(index).toLowerCase();
-    }
+    String ext = FilenameUtils.getExtension(fromFilename);
     
     String saveFilename = UUID.randomUUID().toString() + ext;
     StorageService service = getStorageService();
@@ -31,7 +29,7 @@ public class FileStoreService {
     
     ShareFileEntity entity = new ShareFileEntity();
     entity.filePath = saveFilename;
-    entity.originalFilename = fromFilename;
+    entity.originalFilename = FilenameUtils.getName(fromFilename);
     entity.storageFilename = storageFilename;
     entity.save();
     
