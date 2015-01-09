@@ -1,3 +1,5 @@
+@import com.feth.play.module.pa.views.html._
+
 @main("Welcome to File Sharer") {
 
   @helper.form(action = routes.Application.upload(),
@@ -30,5 +32,15 @@
   Powered by
     <a href="http://www.dropzonejs.com/" target="_blank"><img src="@routes.Assets.at("images/dropzonejs_logo.png")" alt="Dropzone js" /></a>
     <a href="http://www.playframework.com" target="_blank"><img src="@routes.Assets.at("images/playframework_logo.png")" alt="playframework" /></a>
+  </div>
+  <div id="login">
+  @currentAuth() { auth =>
+    @if(auth != null) {
+      <a href="@com.feth.play.module.pa.controllers.routes.Authenticate.logout">Logout</a>
+    }
+  }
+  @forProviders() { p =>
+    <a href="@p.getUrl()">@p.getKey()</a>
+  }
   </div>
 }

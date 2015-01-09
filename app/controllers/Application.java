@@ -8,6 +8,8 @@ import java.util.Map;
 
 import javax.activation.MimetypesFileTypeMap;
 
+import models.User;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 
@@ -19,6 +21,7 @@ import play.mvc.Controller;
 import play.mvc.Http.MultipartFormData;
 import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Http.Request;
+import play.mvc.Http.Session;
 import play.mvc.Result;
 import views.html.index;
 import views.html.showimage;
@@ -29,6 +32,8 @@ import biz.info_cloud.filesharer.service.FileStoreService.StoredFile;
 import biz.info_cloud.web.utils.ContentsUtils;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.feth.play.module.pa.PlayAuthenticate;
+import com.feth.play.module.pa.user.AuthUser;
 
 public class Application extends Controller {
   public static final String FilePartParam = "file";
@@ -48,32 +53,44 @@ public class Application extends Controller {
                   .recover(t -> handleUploadError(t));
   }
   
-  public static Promise<Result> sharer(String filename) {
+  public static Result oAuthDenied(final String session) {
+    com.feth.play.module.pa.controllers.Authenticate.noCache(response());
+    flash(MessageKey.FLASH_ERROR_KEY,
+          "You need to accept the OAuth connection in order to use this website!");
+    return redirect(routes.Application.index());
+  }
+  
+  public static Promise<Result> sharer(final String filename) {
     return Promise.promise(() -> getFile(filename))
                   .map(f -> responseSharer(f))
                   .recover(t -> handleErrro(t));
   }
   
-  public static Promise<Result> show(String filename) {
+  public static Promise<Result> show(final String filename) {
     return Promise.promise(() -> getFile(filename))
                   .map(f -> responseShow(f))
                   .recover(t -> handleErrro(t));
   }
   
-  private static StoredFile getFile(String filename) {
-    FileStoreService service = new FileStoreService();
+  public static User getLocalUser(final Session session) {
+    final AuthUser authUser = PlayAuthenticate.getUser(session);
+    return User.findByAuthUserIdentity(authUser);
+  }
+  
+  private static StoredFile getFile(final String filename) {
+    final FileStoreService service = new FileStoreService();
     return service.getStoredFile(filename);
   }
   
-  private static Result responseSharer(StoredFile file)
+  private static Result responseSharer(final StoredFile file)
       throws IOException {
     if (!file.exists()) {
       throw new FileNotFoundException(
           String.format("%s is not found", file.getKeyPath()));
     }
     
-    String contentType = mimeTypesMap.getContentType(
-        file.getOriginalFilename());
+    String contentType =
+        mimeTypesMap.getContentType(file.getOriginalFilename());
     
     if (getShowType(contentType) == ShowType.TEXT) {
       String encoding = ContentsUtils.detectEncoding(file.getInputStream());
@@ -93,7 +110,7 @@ public class Application extends Controller {
   }
   
   
-  private static Result responseShow(StoredFile file)
+  private static Result responseShow(final StoredFile file)
       throws IOException {
     if (!file.exists()) {
       throw new FileNotFoundException(
@@ -106,7 +123,8 @@ public class Application extends Controller {
     case TEXT:
       String encoding = ContentsUtils.detectEncoding(
           file.getInputStream());
-      String body = StringEscapeUtils.escapeXml(IOUtils.toString(file.getInputStream(), encoding));
+      String body = StringEscapeUtils.escapeXml(
+          IOUtils.toString(file.getInputStream(), encoding));
       return ok(showtext.render(
           file.getKeyPath(),
           file.getOriginalFilename(),
@@ -121,8 +139,8 @@ public class Application extends Controller {
     }
   }
   
-  private static Tuple<StoredFile, Boolean> saveFile(
-      final Request request) throws IOException {
+  private static Tuple<StoredFile, Boolean> saveFile(final Request request)
+      throws IOException {
     MultipartFormData body = request().body().asMultipartFormData();
     if (body == null) {
       throw new MissingFileException("missing mutipart body");
@@ -160,21 +178,21 @@ public class Application extends Controller {
     }
   }
   
-  private static Result handleErrro(Throwable t) {
+  private static Result handleErrro(final Throwable t) {
     if (t instanceof FileNotFoundException) {
       return notFound(t.toString());
     }
     return badRequest(t.toString());
   }
   
-  private static Result handleUploadError(Throwable t) {
+  private static Result handleUploadError(final Throwable t) {
     if (t instanceof MissingFileException) {
       return redirect(controllers.routes.Application.index());
     }
     return badRequest(t.getMessage());
   }
   
-  private static ShowType getShowType(String contentType) {
+  private static ShowType getShowType(final String contentType) {
     String lowerContentType = contentType.toLowerCase(Locale.US);
     if (lowerContentType.startsWith("text/")) {
       return ShowType.TEXT;
@@ -188,15 +206,15 @@ public class Application extends Controller {
   public static class MissingFileException extends IOException {
     private static final long serialVersionUID = -6916009604118436445L;
 
-    public MissingFileException(String message, Throwable cause) {
+    public MissingFileException(final String message, final Throwable cause) {
       super(message, cause);
     }
 
-    public MissingFileException(String message) {
+    public MissingFileException(final String message) {
       super(message);
     }
 
-    public MissingFileException(Throwable cause) {
+    public MissingFileException(final Throwable cause) {
       super(cause);
     }
   }
