@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 
 import play.db.ebean.Model;
 
@@ -22,6 +23,9 @@ public class ShareFileEntity extends Model {
   
   @Column(length=4096)
   public String storageFilename;
+  
+  @ManyToOne(optional = true)
+  public User owner;
   
   @CreatedTimestamp
   public Timestamp createDate;

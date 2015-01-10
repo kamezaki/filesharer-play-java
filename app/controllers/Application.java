@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.activation.MimetypesFileTypeMap;
 
@@ -158,7 +159,9 @@ public class Application extends Controller {
     
     FileStoreService service = new FileStoreService();
     StoredFile storedFile = service.saveFile(
-        uploadFile.getFile(), uploadFile.getFilename());
+        Optional.ofNullable(getLocalUser(session())),
+        uploadFile.getFile(),
+        uploadFile.getFilename());
     return new F.Tuple<StoredFile, Boolean>(
         storedFile, Boolean.valueOf(isFallback));
   }

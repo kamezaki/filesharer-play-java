@@ -33,14 +33,15 @@
     <a href="http://www.dropzonejs.com/" target="_blank"><img src="@routes.Assets.at("images/dropzonejs_logo.png")" alt="Dropzone js" /></a>
     <a href="http://www.playframework.com" target="_blank"><img src="@routes.Assets.at("images/playframework_logo.png")" alt="playframework" /></a>
   </div>
-  <div id="login">
+  <div id="authenticate">
   @currentAuth() { auth =>
     @if(auth != null) {
       <a href="@com.feth.play.module.pa.controllers.routes.Authenticate.logout">Logout</a>
+    } else {
+      @forProviders() { p =>
+        <a href="@p.getUrl()">@p.getKey()</a>
+      }
     }
-  }
-  @forProviders() { p =>
-    <a href="@p.getUrl()">@p.getKey()</a>
   }
   </div>
 }

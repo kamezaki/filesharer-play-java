@@ -4,6 +4,7 @@ import static org.fest.assertions.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 
 import models.ShareFileEntity;
 
@@ -50,7 +51,8 @@ public class FileStoreServiceTest {
   @Test
   public void saveFile() throws Exception {
     FileStoreService service = new FileStoreService();
-    StoredFile storedFile = service.saveFile(sourceFile, sourceFile.getName());
+    StoredFile storedFile = service.saveFile(
+        Optional.empty(), sourceFile, sourceFile.getName());
     
     assertThat(storedFile).isNotNull();
     assertThat(storedFile.getOriginalFilename())
@@ -74,7 +76,8 @@ public class FileStoreServiceTest {
       ext = name.substring(position);
       name = name.substring(0, position) + ext.toUpperCase();
     }
-    StoredFile storedFile = service.saveFile(sourceFile, name);
+    StoredFile storedFile = service.saveFile(
+        Optional.empty(), sourceFile, name);
     
     assertThat(storedFile).isNotNull();
     assertThat(storedFile.getOriginalFilename())
@@ -101,6 +104,7 @@ public class FileStoreServiceTest {
     FileStoreService service = new FileStoreService();
     File file = new File(temporaryFolder.getRoot(), filename);
     
-    service.saveFile(file, filename);
+    service.saveFile(
+        Optional.empty(), file, filename);
   }
 }
