@@ -1,9 +1,8 @@
-package controllers.restricted;
+package controllers;
 
 import com.feth.play.module.pa.PlayAuthenticate;
 import com.feth.play.module.pa.user.AuthUser;
 
-import controllers.MessageKey;
 import controllers.routes;
 import play.mvc.Http.Context;
 import play.mvc.Result;
