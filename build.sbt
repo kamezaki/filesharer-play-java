@@ -7,6 +7,10 @@ lazy val root = (project in file(".")).enablePlugins(PlayJava)
 scalaVersion := "2.11.2"
 
 libraryDependencies ++= Seq(
+  "org.webjars" %% "webjars-play" % "2.3.0-2",
+  "org.webjars" % "jquery" % "1.11.2",
+  "org.webjars" % "bootstrap" % "3.3.1",
+  "org.webjars" % "dropzone" % "3.10.2",
   "com.feth" %% "play-authenticate" % "0.6.8",
   "org.postgresql" % "postgresql" % "9.3-1102-jdbc41",
   "com.googlecode.juniversalchardet" % "juniversalchardet" % "1.0.3",

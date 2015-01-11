@@ -1,13 +1,8 @@
 @(relativePath: String)(originalName: String)
 
 @main("File Sharer - share file") {
-  <div id="download">
+  <div class="row">
     Download from <a href="/sharer/@relativePath?@controllers.Application.DownloadParam">@originalName</a>
   </div>
   <hr />
-  <div id="footer">
-  Powered by
-    <a href="http://www.dropzonejs.com/" target="_blank"><img src="@routes.Assets.at("images/dropzonejs_logo.png")" alt="Dropzone js" /></a>
-    <a href="http://www.playframework.com" target="_blank"><img src="@routes.Assets.at("images/playframework_logo.png")" alt="playframework" /></a>
-  </div>
 }
