@@ -40,7 +40,8 @@ public class ShareFileEntity extends Model {
     if (owner == null) {
       return Collections.emptyList();
     }
-    return getOwnerFind(owner).findList();
+    return getOwnerFind(owner).orderBy("createDate desc")
+                              .findList();
   }
   
   public static ExpressionList<ShareFileEntity> getOwnerFind(final User owner) {
