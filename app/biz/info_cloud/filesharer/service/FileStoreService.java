@@ -33,7 +33,7 @@ public class FileStoreService {
     entity.filePath = saveFilename;
     entity.originalFilename = FilenameUtils.getName(fromFilename);
     entity.storageFilename = storageFilename;
-    owner.map(user -> entity.owner = user);
+    owner.ifPresent(user -> entity.owner = user);
     entity.save();
     
     return new StoredFile(entity.filePath);
@@ -41,6 +41,10 @@ public class FileStoreService {
   
   public StoredFile getStoredFile(final String relativePath) {
     return new StoredFile(relativePath);
+  }
+  
+  public List<ShareFileEntity> getUploadList(User user) {
+    return ShareFileEntity.findByOwner(user);
   }
   
   public void deleteFiles() {

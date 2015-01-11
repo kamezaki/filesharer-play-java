@@ -1,0 +1,17 @@
+@(files: List[models.ShareFileEntity])
+
+@main("File sharer - list your uploads") {
+  <div id="list">
+    num of your uploaded : @files.size()
+    <table>
+    @for(file <- files) {
+      <tr><td>@file.originalFilename</td><td>@file.createDate</td></tr>
+    }
+    </table>
+  </div>
+  <div id="footer">
+  Powered by
+    <a href="http://www.dropzonejs.com/" target="_blank"><img src="@routes.Assets.at("images/dropzonejs_logo.png")" alt="Dropzone js" /></a>
+    <a href="http://www.playframework.com" target="_blank"><img src="@routes.Assets.at("images/playframework_logo.png")" alt="playframework" /></a>
+  </div>
+}

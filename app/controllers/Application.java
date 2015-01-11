@@ -24,10 +24,12 @@ import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Http.Request;
 import play.mvc.Http.Session;
 import play.mvc.Result;
+import play.mvc.Security.Authenticated;
 import views.html.index;
 import views.html.showimage;
 import views.html.showother;
 import views.html.showtext;
+import views.html.uploadlist;
 import biz.info_cloud.filesharer.service.FileStoreService;
 import biz.info_cloud.filesharer.service.FileStoreService.StoredFile;
 import biz.info_cloud.web.utils.ContentsUtils;
@@ -52,6 +54,13 @@ public class Application extends Controller {
     return Promise.promise(() -> saveFile(request()))
                   .map(path -> responseUpload(path))
                   .recover(t -> handleUploadError(t));
+  }
+  
+  @Authenticated(Secured.class)
+  public static Promise<Result> uploadList() {
+    User user = getLocalUser(session());
+    return Promise.promise(() -> new FileStoreService().getUploadList(user))
+                  .map(list -> ok(uploadlist.render(list)));
   }
   
   public static Result oAuthDenied(final String session) {

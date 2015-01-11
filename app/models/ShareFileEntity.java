@@ -1,6 +1,8 @@
 package models;
 
 import java.sql.Timestamp;
+import java.util.Collections;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,6 +11,7 @@ import javax.persistence.ManyToOne;
 
 import play.db.ebean.Model;
 
+import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.annotation.CreatedTimestamp;
 
 @Entity
@@ -29,17 +32,23 @@ public class ShareFileEntity extends Model {
   
   @CreatedTimestamp
   public Timestamp createDate;
-  
-  @Override
-  public void delete() {
-    super.delete();
-  }
 
+  public static Finder<String, ShareFileEntity> find =
+      new Finder<>(String.class, ShareFileEntity.class);
+  
+  public static List<ShareFileEntity> findByOwner(final User owner) {
+    if (owner == null) {
+      return Collections.emptyList();
+    }
+    return getOwnerFind(owner).findList();
+  }
+  
+  public static ExpressionList<ShareFileEntity> getOwnerFind(final User owner) {
+    return find.where().eq("owner", owner);
+  }
+  
   @Override
   public String toString() {
     return filePath;
   }
-  
-  public static Finder<String, ShareFileEntity> find =
-      new Finder<>(String.class, ShareFileEntity.class);
 }
