@@ -25,7 +25,7 @@ public class FileStoreService {
     // check extension
     String ext = FilenameUtils.getExtension(fromFilename);
     
-    String saveFilename = UUID.randomUUID().toString() + ext;
+    String saveFilename = UUID.randomUUID().toString() + "." + ext;
     StorageService service = getStorageService();
     String storageFilename = service.save(fromFile, saveFilename);
     

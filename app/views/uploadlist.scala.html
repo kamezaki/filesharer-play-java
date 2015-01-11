@@ -1,12 +1,21 @@
 @(files: List[models.ShareFileEntity])
 
 @main("File sharer - upload files") {
-  <div id="list">
+  @if(files.size() < 1) {
     num of your uploaded : @files.size()
-    <table>
+  } else {
+    <table class="table table-bordered table-striped">
+      <tr>
+        <th>filename</th>
+        <th>upload time</th>
+      </tr>
     @for(file <- files) {
-      <tr><td>@Html(file.originalFilename)</td><td>@file.createDate</td></tr>
+      <tr>
+        <td><a href="@controllers.routes.Application.show(file.filePath)" target="_blank">@Html(file.originalFilename)</a></td>
+        <td>@java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(file.createDate.toLocalDateTime())</td>
+      </tr>
     }
     </table>
+  }
   </div>
 }
