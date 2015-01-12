@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -25,7 +26,7 @@ public class FileStoreService {
     // check extension
     String ext = FilenameUtils.getExtension(fromFilename);
     
-    String saveFilename = UUID.randomUUID().toString() + "." + ext;
+    String saveFilename = UUID.randomUUID().toString() + "." + ext.toLowerCase(Locale.US);
     StorageService service = getStorageService();
     String storageFilename = service.save(fromFile, saveFilename);
     
