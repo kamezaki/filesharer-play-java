@@ -1,43 +1,7 @@
-@import com.feth.play.module.pa.views.html._
-
 @(files: List[models.ShareFileEntity])
 
 @main("File sharer - upload files") {
-
-<nav class="navbar navbar-default" role="navigation">
-  <div class="container-fluid">
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#topmenu">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <a class="navbar-brand" href="#">File sharer</a>
-    </div>
- 
-    <div class="collapse navbar-collapse" id="topmenu">
-      <ul class="nav navbar-nav navbar-left">
-        <li><a href="@controllers.routes.Application.index">Upload</a></li>
-        <li class="active"><a href="#">List</a></li>
-      </ul>
-      
-      <ul class="nav navbar-nav navbar-right">
-        @currentAuth() { auth =>
-          @if(auth != null) {
-            <li><a href="@com.feth.play.module.pa.controllers.routes.Authenticate.logout">Logout</a></li>
-          } else {
-            @forProviders() { p =>
-              <li><a href="@p.getUrl()">@p.getKey()</a></li>
-            }
-          }
-        }
-      </ul>
-    </div>
-  </div>
-</nav>
-
-
+@topmenu()
 <div class="container">
   @if(files.size() < 1) {
     num of your uploaded : @files.size()

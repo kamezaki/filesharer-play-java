@@ -1,0 +1,8 @@
+@import play.api.mvc._
+
+@(uri: String, text: String)(implicit request:RequestHeader)
+@if(uri.equals(request.path)) {
+  <li class="active"><a href="#">@text</a></li>
+} else {
+  <li><a href=@uri>@text</a></li>
+}
