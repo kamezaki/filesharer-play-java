@@ -16,6 +16,8 @@ import models.User;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 
+import play.filters.csrf.AddCSRFToken;
+import play.filters.csrf.RequireCSRFCheck;
 import play.libs.F;
 import play.libs.F.Promise;
 import play.libs.F.Tuple;
@@ -28,11 +30,11 @@ import play.mvc.Http.Session;
 import play.mvc.Result;
 import play.mvc.Security.Authenticated;
 import views.html.index;
+import views.html.login;
 import views.html.showimage;
 import views.html.showother;
 import views.html.showtext;
 import views.html.uploadlist;
-import views.html.login;
 import biz.info_cloud.filesharer.service.FileStoreService;
 import biz.info_cloud.filesharer.service.FileStoreService.StoredFile;
 import biz.info_cloud.web.utils.ContentsUtils;
@@ -71,11 +73,21 @@ public class Application extends Controller {
                   .recover(t -> handleUploadError(t));
   }
   
+  @AddCSRFToken
   @Authenticated(Secured.class)
   public static Promise<Result> uploadList() {
     User user = getLocalUser(session());
     return Promise.promise(() -> new FileStoreService().getUploadList(user))
                   .map(list -> ok(uploadlist.render(list)));
+  }
+  
+  @RequireCSRFCheck
+  @Authenticated(Secured.class)
+  public static Promise<Result> delete(final String filename) {
+    return Promise.promise(() -> {
+      new FileStoreService().delete(filename);
+      return redirect(routes.Application.uploadList());
+    });
   }
   
   public static Result oAuthDenied(final String session) {

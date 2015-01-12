@@ -44,6 +44,10 @@ public class ShareFileEntity extends Model {
                               .findList();
   }
   
+  public static ShareFileEntity findByPath(final String path) {
+    return find.byId(path);
+  }
+  
   public static ExpressionList<ShareFileEntity> getOwnerFind(final User owner) {
     return find.where().eq("owner", owner);
   }

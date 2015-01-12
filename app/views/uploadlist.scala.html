@@ -10,7 +10,8 @@
         <th>
           <div class="col-xs-12 col-sm-12 col-md-6">Filename</div>
           <div class="col-xs-12 col-sm-6 col-md-3">Time</div>
-          <div class="col-xs-12 col-sm-6 col-md-3">Owner</div>
+          <div class="col-xs-11 col-sm-5 col-md-2">Owner</div>
+          <div class="col-xs-1 col-sm-1 col-md-1">&nbsp;</div>
         </th>
       </tr>
     @for(file <- files) {
@@ -18,7 +19,8 @@
         <td>
           <div class="col-xs-12 col-sm-12 col-md-6"><a href="@controllers.routes.Application.show(file.filePath)" target="_blank">@Html(file.originalFilename)</a></div>
           <div class="col-xs-12 col-sm-6 col-md-3">@java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(file.createDate.toLocalDateTime())</div>
-          <div class="col-xs-12 col-sm-6 col-md-3">@Html(file.owner.name)</div>
+          <div class="col-xs-11 col-sm-5 col-md-2">@Html(file.owner.name)</div>
+          <div class="col-xs-1 col-sm-1 col-md-1">@*<span class="glyphicon glyphicon-trash" />*@</div>
         </td>
       </tr>
     }

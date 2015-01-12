@@ -48,6 +48,20 @@ public class FileStoreService {
     return ShareFileEntity.findByOwner(user);
   }
   
+  public void delete(final String relativePath) {
+    ShareFileEntity entity = ShareFileEntity.findByPath(relativePath);
+    if (entity != null) {
+      StorageService storageService = getStorageService();
+      try {
+        storageService.delete(entity.storageFilename);
+      } catch (IOException e) {
+        Logger.debug(e.toString());
+      }
+      
+      entity.delete();
+    }
+  }
+  
   public void deleteFiles() {
     Logger.info(String.format("Delete shared files started [%s]", LocalDateTime.now().toString()));
 
