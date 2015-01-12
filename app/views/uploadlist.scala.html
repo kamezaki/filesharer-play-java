@@ -7,15 +7,19 @@
   } else {
     <table class="table table-bordered table-striped">
       <tr>
-        <th>filename</th>
-        <th>upload time</th>
-        <th>file owner</th>
+        <th>
+          <div class="col-xs-12 col-sm-12 col-md-6">Filename</div>
+          <div class="col-xs-12 col-sm-6 col-md-3">Time</div>
+          <div class="col-xs-12 col-sm-6 col-md-3">Owner</div>
+        </th>
       </tr>
     @for(file <- files) {
       <tr>
-        <td><a href="@controllers.routes.Application.show(file.filePath)" target="_blank">@Html(file.originalFilename)</a></td>
-        <td>@java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(file.createDate.toLocalDateTime())</td>
-        <td>@Html(file.owner.name)</td>
+        <td>
+          <div class="col-xs-12 col-sm-12 col-md-6"><a href="@controllers.routes.Application.show(file.filePath)" target="_blank">@Html(file.originalFilename)</a></div>
+          <div class="col-xs-12 col-sm-6 col-md-3">@java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(file.createDate.toLocalDateTime())</div>
+          <div class="col-xs-12 col-sm-6 col-md-3">@Html(file.owner.name)</div>
+        </td>
       </tr>
     }
     </table>
