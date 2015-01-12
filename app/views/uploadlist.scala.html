@@ -46,11 +46,13 @@
       <tr>
         <th>filename</th>
         <th>upload time</th>
+        <th>file owner</th>
       </tr>
     @for(file <- files) {
       <tr>
         <td><a href="@controllers.routes.Application.show(file.filePath)" target="_blank">@Html(file.originalFilename)</a></td>
         <td>@java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(file.createDate.toLocalDateTime())</td>
+        <td>@Html(file.owner.name)</td>
       </tr>
     }
     </table>
