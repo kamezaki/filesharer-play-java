@@ -1,7 +1,41 @@
 @import com.feth.play.module.pa.views.html._
 
 @main("Welcome to File Sharer") {
-<div class="container">
+
+<nav class="navbar navbar-default" role="navigation">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#topmenu">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">File sharer</a>
+    </div>
+ 
+    <div class="collapse navbar-collapse" id="topmenu">
+      <ul class="nav navbar-nav navbar-left">
+        <li class="active"><a href="#">Upload</a></li>
+        <li><a href="@controllers.routes.Application.uploadList">List</a></li>
+      </ul>
+      
+      <ul class="nav navbar-nav navbar-right">
+        @currentAuth() { auth =>
+          @if(auth != null) {
+            <li><a href="@com.feth.play.module.pa.controllers.routes.Authenticate.logout">Logout</a></li>
+          } else {
+            @forProviders() { p =>
+              <li><a href="@p.getUrl()">@p.getKey()</a></li>
+            }
+          }
+        }
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container-fluid">
   <div class="row">
     @helper.form(action = routes.Application.upload(),
                  'enctype -> "multipart/form-data",
@@ -27,17 +61,6 @@
         <input type="hidden" name="@controllers.Application.FallbackModeParam">
         <input type="submit" />
       </div>
-    }
-  </div>
-  <div class="row">
-    @currentAuth() { auth =>
-      @if(auth != null) {
-        <a href="@com.feth.play.module.pa.controllers.routes.Authenticate.logout">Logout</a>
-      } else {
-        @forProviders() { p =>
-          <a href="@p.getUrl()">@p.getKey()</a>
-        }
-      }
     }
   </div>
 </div>
