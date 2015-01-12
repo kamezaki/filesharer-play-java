@@ -1,6 +1,7 @@
 @(relativePath: String)(originalName: String)(bodyContent: String)
 
 @main("File Sharer - share file") {
+<div class="container">
   <div class="row">
     Download from <a href="/sharer/@relativePath?@controllers.Application.DownloadParam">@originalName</a>
   </div>
@@ -10,4 +11,5 @@
 @Html(bodyContent)
 </pre>
   </div>
+</div>
 }

@@ -1,6 +1,7 @@
 @import com.feth.play.module.pa.views.html._
 
 @main("Welcome to File Sharer") {
+<div class="container">
   <div class="row">
     @helper.form(action = routes.Application.upload(),
                  'enctype -> "multipart/form-data",
@@ -39,4 +40,5 @@
       }
     }
   </div>
+</div>
 }

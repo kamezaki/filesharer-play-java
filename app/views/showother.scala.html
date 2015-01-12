@@ -1,8 +1,10 @@
 @(relativePath: String)(originalName: String)
 
 @main("File Sharer - share file") {
+<div class="container">
   <div class="row">
     Download from <a href="/sharer/@relativePath?@controllers.Application.DownloadParam">@originalName</a>
+    <hr />
   </div>
-  <hr />
+</div>
 }
