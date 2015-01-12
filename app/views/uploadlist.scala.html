@@ -1,7 +1,6 @@
 @(files: List[models.ShareFileEntity])
 
 @main("File sharer - upload files") {
-@topmenu()
 <div class="container">
   @if(files.size() < 1) {
     num of your uploaded : @files.size()
