@@ -4,6 +4,7 @@
 
 # Home page
 GET     /                           controllers.Application.index()
+GET     /login                      controllers.Application.login()
 POST    /file-upload                controllers.Application.upload()
 GET     /list                       controllers.Application.uploadList()
 GET     /sharer/*file               controllers.Application.sharer(file)

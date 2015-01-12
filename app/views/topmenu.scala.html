@@ -14,8 +14,12 @@
  
     <div class="collapse navbar-collapse" id="topmenu">
       <ul class="nav navbar-nav navbar-left">
-        @menuitem(controllers.routes.Application.index.url, "Upload")
-        @menuitem(controllers.routes.Application.uploadList.url, "List")
+        @menuitem(controllers.routes.Application.index.url, "Main")
+        @currentAuth() { auth =>
+          @if(auth != null) {
+            @menuitem(controllers.routes.Application.uploadList.url, "Uploaded List")
+          }
+        }
       </ul>
       
       <ul class="nav navbar-nav navbar-right">
@@ -23,9 +27,7 @@
           @if(auth != null) {
             <li><a href="@com.feth.play.module.pa.controllers.routes.Authenticate.logout">Logout</a></li>
           } else {
-            @forProviders() { p =>
-              <li><a href="@p.getUrl()">@p.getKey()</a></li>
-            }
+            @menuitem(controllers.routes.Application.login.url, "Login")
           }
         }
       </ul>

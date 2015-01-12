@@ -3,6 +3,8 @@ package controllers;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -30,12 +32,14 @@ import views.html.showimage;
 import views.html.showother;
 import views.html.showtext;
 import views.html.uploadlist;
+import views.html.login;
 import biz.info_cloud.filesharer.service.FileStoreService;
 import biz.info_cloud.filesharer.service.FileStoreService.StoredFile;
 import biz.info_cloud.web.utils.ContentsUtils;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.feth.play.module.pa.PlayAuthenticate;
+import com.feth.play.module.pa.providers.oauth2.google.GoogleAuthProvider;
 import com.feth.play.module.pa.user.AuthUser;
 
 public class Application extends Controller {
@@ -44,10 +48,21 @@ public class Application extends Controller {
   public static final String JsonPathParam = "path";
   public static final String DownloadParam = "download";
   
+  public static Map<String, String> providerMap = initializeProviderMap();
+  private static Map<String, String> initializeProviderMap() {
+    Map<String, String> map = new HashMap<>();
+    map.put(GoogleAuthProvider.PROVIDER_KEY, "images/sign-in-with-google.png");
+    return Collections.unmodifiableMap(map);
+  }
+  
   private static MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();
   
   public static Result index() {
     return ok(index.render());
+  }
+  
+  public static Result login() {
+    return ok(login.render());
   }
   
   public static Promise<Result> upload() {
@@ -91,7 +106,7 @@ public class Application extends Controller {
     final FileStoreService service = new FileStoreService();
     return service.getStoredFile(filename);
   }
-  
+
   private static Result responseSharer(final StoredFile file)
       throws IOException {
     if (!file.exists()) {
