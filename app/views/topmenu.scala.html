@@ -1,3 +1,4 @@
+@import com.feth.play.module.pa.providers.AuthProvider.Registry
 @import com.feth.play.module.pa.views.html._
 
 <nav class="navbar navbar-default" role="navigation">
@@ -22,15 +23,19 @@
         }
       </ul>
       
-      <ul class="nav navbar-nav navbar-right">
-        @currentAuth() { auth =>
-          @if(auth != null) {
-            <li><a href="@com.feth.play.module.pa.controllers.routes.Authenticate.logout">Logout</a></li>
-          } else {
-            @menuitem(controllers.routes.Application.login.url, "Login")
-          }
+      @defining(Registry.getProviders()) { providers =>
+        @if(providers != null && providers.size() > 0) {
+          <ul class="nav navbar-nav navbar-right">
+            @currentAuth() { auth =>
+              @if(auth != null) {
+                <li><a href="@com.feth.play.module.pa.controllers.routes.Authenticate.logout">Logout</a></li>
+              } else {
+                @menuitem(controllers.routes.Application.login.url, "Login")
+             }
+           }
+          </ul>
         }
-      </ul>
+      }
     </div>
   </div>
 </nav>
