@@ -41,6 +41,7 @@ import biz.info_cloud.web.utils.ContentsUtils;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.feth.play.module.pa.PlayAuthenticate;
+import com.feth.play.module.pa.providers.AuthProvider;
 import com.feth.play.module.pa.providers.oauth2.google.GoogleAuthProvider;
 import com.feth.play.module.pa.user.AuthUser;
 
@@ -49,6 +50,8 @@ public class Application extends Controller {
   public static final String FallbackModeParam = "fallback-mode";
   public static final String JsonPathParam = "path";
   public static final String DownloadParam = "download";
+  
+  public static final String SPNEGO_PROVIDER_KEY = "spnego";
   
   public static Map<String, String> providerMap = initializeProviderMap();
   private static Map<String, String> initializeProviderMap() {
@@ -64,6 +67,10 @@ public class Application extends Controller {
   }
   
   public static Result login() {
+    AuthProvider p = PlayAuthenticate.getProvider(SPNEGO_PROVIDER_KEY);
+    if (p != null) {
+      return redirect(com.feth.play.module.pa.controllers.routes.Authenticate.authenticate(SPNEGO_PROVIDER_KEY));
+    }
     return ok(login.render());
   }
   
