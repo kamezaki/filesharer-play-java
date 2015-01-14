@@ -1,34 +1,31 @@
 @main("Welcome to File Sharer") {
-
-  @helper.form(action = routes.Application.upload(),
-               'enctype -> "multipart/form-data",
-               'class -> "dropzone",
-               'id -> "my-dropzone") {
-    <script>
-      Dropzone.options.myDropzone = {
-        init: function() {
-          this.on("success", function(file) {
-            var result = JSON.parse(file.xhr.response)
-            var textNode = document.createTextNode('uploaded file');
-            var link = document.createElement('a');
-            link.setAttribute('href', result.path);
-            link.setAttribute('target', '_blank');
-            link.appendChild(textNode);
-            file.previewTemplate.appendChild(link);
-          });
-        }
-      };
-    </script>
-    <div class="fallback">
-      <input type="file" name="file" /> @* name:file is defined by dropzone.js *@
-      <input type="hidden" name="@controllers.Application.FallbackModeParam">
-      <input type="submit" />
-    </div>
-  }
-  <hr />
-  <div id="footer">
-  Powered by
-    <a href="http://www.dropzonejs.com/" target="_blank"><img src="@routes.Assets.at("images/dropzonejs_logo.png")" alt="Dropzone js" /></a>
-    <a href="http://www.playframework.com" target="_blank"><img src="@routes.Assets.at("images/playframework_logo.png")" alt="playframework" /></a>
+<div class="container-fluid">
+  <div class="row">
+    @helper.form(action = routes.Application.upload(),
+                 'enctype -> "multipart/form-data",
+                 'class -> "dropzone",
+                 'id -> "my-dropzone") {
+      <script>
+        Dropzone.options.myDropzone = {
+          init: function() {
+            this.on("success", function(file) {
+              var result = JSON.parse(file.xhr.response)
+              var textNode = document.createTextNode('show this');
+              var link = document.createElement('a');
+              link.setAttribute('href', result.path);
+              link.setAttribute('target', '_blank');
+              link.appendChild(textNode);
+              file.previewTemplate.appendChild(link);
+            });
+          }
+        };
+      </script>
+      <div class="fallback">
+        <input type="file" name="file" /> @* name:file is defined by dropzone.js *@
+        <input type="hidden" name="@controllers.Application.FallbackModeParam">
+        <input type="submit" />
+      </div>
+    }
   </div>
+</div>
 }

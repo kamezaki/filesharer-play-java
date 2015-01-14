@@ -12,6 +12,7 @@ import biz.info_cloud.filesharer.service.FileStoreService.StoredFile;
 public class StoredFileTest {
   @ClassRule
   public static MyFakeApplication app = new MyFakeApplication();
+  
   @Rule
   public TemporaryFolder temporaryFolder = new TemporaryFolder();
   

@@ -2,6 +2,7 @@ logs
 project/project
 project/target
 target
+conf/evolutions
 tmp
 .history
 dist
@@ -14,6 +15,7 @@ dist
 /RUNNING_PID
 /.settings
 /bin/
+environment.*
 
 .metadata
 

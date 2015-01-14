@@ -6,24 +6,27 @@ import java.io.InputStream;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 
 import org.apache.commons.io.FilenameUtils;
 
 import models.ShareFileEntity;
+import models.User;
 import play.Logger;
 import biz.info_cloud.filesharer.LocalConfig;
 import biz.info_cloud.filesharer.service.storage.StorageService;
 import biz.info_cloud.filesharer.service.storage.StorageServiceFactory;
 
 public class FileStoreService {
-  public StoredFile saveFile(final File fromFile, final String fromFilename)
+  public StoredFile saveFile(final Optional<User> owner, final File fromFile, final String fromFilename)
       throws IOException {
     // check extension
     String ext = FilenameUtils.getExtension(fromFilename);
     
-    String saveFilename = UUID.randomUUID().toString() + ext;
+    String saveFilename = UUID.randomUUID().toString() + "." + ext.toLowerCase(Locale.US);
     StorageService service = getStorageService();
     String storageFilename = service.save(fromFile, saveFilename);
     
@@ -31,6 +34,7 @@ public class FileStoreService {
     entity.filePath = saveFilename;
     entity.originalFilename = FilenameUtils.getName(fromFilename);
     entity.storageFilename = storageFilename;
+    owner.ifPresent(user -> entity.owner = user);
     entity.save();
     
     return new StoredFile(entity.filePath);
@@ -38,6 +42,24 @@ public class FileStoreService {
   
   public StoredFile getStoredFile(final String relativePath) {
     return new StoredFile(relativePath);
+  }
+  
+  public List<ShareFileEntity> getUploadList(User user) {
+    return ShareFileEntity.findByOwner(user);
+  }
+  
+  public void delete(final String relativePath) {
+    ShareFileEntity entity = ShareFileEntity.findByPath(relativePath);
+    if (entity != null) {
+      StorageService storageService = getStorageService();
+      try {
+        storageService.delete(entity.storageFilename);
+      } catch (IOException e) {
+        Logger.debug(e.toString());
+      }
+      
+      entity.delete();
+    }
   }
   
   public void deleteFiles() {

@@ -1,0 +1,41 @@
+@import com.feth.play.module.pa.providers.AuthProvider.Registry
+@import com.feth.play.module.pa.views.html._
+
+<nav class="navbar navbar-default" role="navigation">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#topmenu">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">File sharer</a>
+    </div>
+ 
+    <div class="collapse navbar-collapse" id="topmenu">
+      <ul class="nav navbar-nav navbar-left">
+        @menuitem(controllers.routes.Application.index.url, "Main")
+        @currentAuth() { auth =>
+          @if(auth != null) {
+            @menuitem(controllers.routes.Application.uploadList.url, "Uploaded List")
+          }
+        }
+      </ul>
+      
+      @defining(Registry.getProviders()) { providers =>
+        @if(providers != null && providers.size() > 0) {
+          <ul class="nav navbar-nav navbar-right">
+            @currentAuth() { auth =>
+              @if(auth != null) {
+                <li><a href="@com.feth.play.module.pa.controllers.routes.Authenticate.logout">Logout</a></li>
+              } else {
+                @menuitem(controllers.routes.Application.login.url, "Login")
+             }
+           }
+          </ul>
+        }
+      }
+    </div>
+  </div>
+</nav>
