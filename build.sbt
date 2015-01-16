@@ -22,3 +22,5 @@ libraryDependencies ++= Seq(
   filters,
   javaWs
 )
+
+doc in Compile <<= target.map(_ / "none")

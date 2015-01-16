@@ -2,7 +2,6 @@ logs
 project/project
 project/target
 target
-conf/evolutions
 tmp
 .history
 dist
