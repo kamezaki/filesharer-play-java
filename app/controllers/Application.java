@@ -16,6 +16,7 @@ import models.User;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 
+import play.data.Form;
 import play.filters.csrf.AddCSRFToken;
 import play.filters.csrf.RequireCSRFCheck;
 import play.libs.F;
@@ -34,7 +35,10 @@ import views.html.login;
 import views.html.showimage;
 import views.html.showother;
 import views.html.showtext;
+import views.html.signup;
 import views.html.uploadlist;
+import biz.info_cloud.filesharer.providers.MyUsernamePasswordAuthProvider;
+import biz.info_cloud.filesharer.providers.MyUsernamePasswordAuthProvider.MySignup;
 import biz.info_cloud.filesharer.service.FileStoreService;
 import biz.info_cloud.filesharer.service.FileStoreService.StoredFile;
 import biz.info_cloud.web.utils.ContentsUtils;
@@ -72,6 +76,19 @@ public class Application extends Controller {
       return redirect(com.feth.play.module.pa.controllers.routes.Authenticate.authenticate(SPNEGO_PROVIDER_KEY));
     }
     return ok(login.render());
+  }
+  
+  public static Result signup() {
+    return ok(signup.render(MyUsernamePasswordAuthProvider.SIGNUP_FORM));
+  }
+  
+  public static Result doSignup() {
+    com.feth.play.module.pa.controllers.Authenticate.noCache(response());
+    final Form<MySignup> filledForm = MyUsernamePasswordAuthProvider.SIGNUP_FORM.bindFromRequest();
+    if (filledForm.hasErrors()) {
+      return badRequest(signup.render(filledForm));
+    }
+    return MyUsernamePasswordAuthProvider.handleSignup(ctx());
   }
   
   public static Promise<Result> upload() {

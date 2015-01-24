@@ -14,6 +14,11 @@
               <a href="@p.getUrl()"><button type="button" class="btn btn-primary btn-lg">@p.getKey()</button></a>
           }
         }
+        @providerAvailable("password") { available: Boolean =>
+          @if(available) {
+              <a href="@controllers.routes.Application.signup()"><button type="button" class="btn btn-primary btn-lg">Signup by email</button></a>
+          }
+        }
       }
     }
     </div>

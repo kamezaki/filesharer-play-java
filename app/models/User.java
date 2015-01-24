@@ -12,11 +12,13 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import models.TokenAction.Type;
 import play.data.validation.Constraints;
 import play.db.ebean.Model;
 
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.ExpressionList;
+import com.feth.play.module.pa.providers.password.UsernamePasswordAuthUser;
 import com.feth.play.module.pa.user.AuthUser;
 import com.feth.play.module.pa.user.AuthUserIdentity;
 import com.feth.play.module.pa.user.EmailIdentity;
@@ -137,8 +139,45 @@ public class User extends Model {
                .eq("active", true)
                .eq("email", email);
   }
+  
+  public static User findByUsernamePasswordIdentity(final UsernamePasswordAuthUser identity) {
+    return getUsernamePasswordAuthUserFind(identity).findUnique();
+  }
+  
+  private static ExpressionList<User> getUsernamePasswordAuthUserFind(
+      final UsernamePasswordAuthUser identity) {
+    return getEmailUserFind(identity.getEmail())
+        .eq("linkedAccounts.providerKey", identity.getProvider());
+  }
 
   public LinkedAccount getAccountByProvider(final String providerKey) {
     return LinkedAccount.findByProviderKey(this, providerKey);
+  }
+  
+  public static void verify(final User unverified) {
+    unverified.emailValidated = true;
+    unverified.save();
+    TokenAction.deleteByUser(unverified, Type.EMAIL_VERIFICATION);
+  }
+  
+  public void changePassword(
+      final UsernamePasswordAuthUser authUser, final boolean create) {
+    LinkedAccount link = getAccountByProvider(authUser.getProvider());
+    if (link == null) {
+      if (create) {
+        link = LinkedAccount.create(authUser);
+        link.user = this;
+      } else {
+        throw new RuntimeException("Account not enabled for password usage.");
+      }
+      link.providerUserId = authUser.getHashedPassword();
+      link.save();
+    }
+  }
+  
+  public void resetPassword(
+      final UsernamePasswordAuthUser authUser, final boolean create) {
+    changePassword(authUser, create);
+    TokenAction.deleteByUser(this, Type.PASSWORD_RESET);
   }
 }
