@@ -4,7 +4,7 @@
 
 # Home page
 GET     /                           controllers.Application.index()
-GET     /login                      controllers.Application.login()
+GET     /loginlist                  controllers.Application.loginList()
 GET     /signup                     controllers.Application.signup()
 POST    /signup                     controllers.Application.doSignup()
 POST    /file-upload                controllers.Application.upload()

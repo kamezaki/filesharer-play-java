@@ -31,7 +31,7 @@ import play.mvc.Http.Session;
 import play.mvc.Result;
 import play.mvc.Security.Authenticated;
 import views.html.index;
-import views.html.login;
+import views.html.loginlist;
 import views.html.showimage;
 import views.html.showother;
 import views.html.showtext;
@@ -70,12 +70,12 @@ public class Application extends Controller {
     return ok(index.render());
   }
   
-  public static Result login() {
+  public static Result loginList() {
     AuthProvider p = PlayAuthenticate.getProvider(SPNEGO_PROVIDER_KEY);
     if (p != null) {
       return redirect(com.feth.play.module.pa.controllers.routes.Authenticate.authenticate(SPNEGO_PROVIDER_KEY));
     }
-    return ok(login.render());
+    return ok(loginlist.render());
   }
   
   public static Result signup() {

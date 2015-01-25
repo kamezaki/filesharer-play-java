@@ -37,7 +37,8 @@ public class Signup extends Controller {
     if (Application.getLocalUser(session()) != null) {
       return redirect(routes.Application.index());
     } else {
-      return redirect(routes.Application.login());
+      // TODO
+      return redirect(routes.Application.loginList());
     }
   }
   
