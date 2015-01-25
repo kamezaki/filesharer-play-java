@@ -17,6 +17,24 @@
   <body>
     @topmenu()
     @content
+
+    <div class="container">
+      @if(flash.contains(MessageKey.FLASH_ERROR_KEY)) {
+        <br />
+        <div class="alert alert-danger" role="alert">
+          <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+          @flash().get(MessageKey.FLASH_ERROR_KEY)
+        </div>
+      }
+      
+      @if(flash.contains(MessageKey.FLASH_MESSAGE_KEY)) {
+        <br />
+        <div class="alert alert-success" role="alert">
+          <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+          @flash().get(MessageKey.FLASH_MESSAGE_KEY)
+        </div>
+      }
+    </div>
     
     <div class="container-fluid">
       <div class="row"><hr /></div>

@@ -252,16 +252,22 @@ public class MyUsernamePasswordAuthProvider
     try {
       clazz = Class.forName(String.format("%s_%s", template, langCode));
     } catch (ClassNotFoundException e) {
-      Logger.warn("Template '%s_%s' was not found. Try to use fallback '%s_%s' instead. ",
-          template, langCode, template, EMAIL_TEMPLATE_FALLBACK_LANGUAGE);
+      Logger.warn(
+          String.format(
+              "Template '%s_%s' was not found. Try to use fallback '%s_%s' instead. ",
+              template, langCode, template, EMAIL_TEMPLATE_FALLBACK_LANGUAGE)
+              );
     }
     
     if (clazz == null) {
       try {
         clazz = Class.forName(String.format("%s_%s", template, EMAIL_TEMPLATE_FALLBACK_LANGUAGE));
       } catch (ClassNotFoundException e) {
-        Logger.error("Fallback template '%s_%s' was not found either",
-            template, EMAIL_TEMPLATE_FALLBACK_LANGUAGE);
+        Logger.error(
+            String.format(
+                "Fallback template '%s_%s' was not found either",
+                template, EMAIL_TEMPLATE_FALLBACK_LANGUAGE)
+                );
         return null;
       }
     }

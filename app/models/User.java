@@ -2,6 +2,7 @@ package models;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -13,6 +14,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import models.TokenAction.Type;
+import play.data.format.Formats;
 import play.data.validation.Constraints;
 import play.db.ebean.Model;
 
@@ -30,7 +32,7 @@ public class User extends Model {
   /**
    * 
    */
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 2L;
 
   @Id
   public Long id;
@@ -43,6 +45,9 @@ public class User extends Model {
 
   public String name;
 
+  @Formats.DateTime(pattern = "yyyy-MM-dd HH:mm:ss")
+  public Date lastLogin;
+  
   public boolean active;
 
   public boolean emailValidated;
@@ -54,9 +59,15 @@ public class User extends Model {
       new Finder<Long, User>(Long.class, User.class);
 
   public static boolean existsByAuthUserIdentity(final AuthUserIdentity identity) {
-    final ExpressionList<User> exp = getAuthUserFind(identity);
+    final ExpressionList<User> exp;
+    if (identity instanceof UsernamePasswordAuthUser) {
+      exp = getUsernamePasswordAuthUserFind((UsernamePasswordAuthUser) identity);
+    } else {
+      exp = getAuthUserFind(identity);
+    }
     return exp.findRowCount() > 0;
   }
+  
 
   private static ExpressionList<User> getAuthUserFind(final AuthUserIdentity identity) {
     return find.where()
@@ -64,10 +75,13 @@ public class User extends Model {
                .eq("linkedAccounts.providerUserId", identity.getId())
                .eq("linkedAccounts.providerKey", identity.getProvider());
   }
-
+  
   public static User findByAuthUserIdentity(final AuthUserIdentity identity) {
     if (identity == null) {
       return null;
+    }
+    if (identity instanceof UsernamePasswordAuthUser) {
+      return findByUsernamePasswordIdentity((UsernamePasswordAuthUser) identity);
     }
     return getAuthUserFind(identity).findUnique();
   }
@@ -134,6 +148,12 @@ public class User extends Model {
     return getEmailUserFind(email).findUnique();
   }
 
+  public static void setLastLoginDate(final AuthUser knownUser) {
+    final User user = findByAuthUserIdentity(knownUser);
+    user.lastLogin = new Date();
+    user.save();
+  }
+  
   private static ExpressionList<User> getEmailUserFind(final String email) {
     return find.where()
                .eq("active", true)

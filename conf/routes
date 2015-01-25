@@ -4,7 +4,8 @@
 
 # Home page
 GET     /                           controllers.Application.index()
-GET     /loginlist                  controllers.Application.loginList()
+GET     /login                      controllers.Application.login()
+POST    /login                      controllers.Application.doLogin()
 GET     /signup                     controllers.Application.signup()
 POST    /signup                     controllers.Application.doSignup()
 POST    /file-upload                controllers.Application.upload()
@@ -13,7 +14,7 @@ GET     /sharer/*file               controllers.Application.sharer(file)
 GET     /show/*file                 controllers.Application.show(file)
 POST    /delete/*file               controllers.Application.delete(file)
 
-GET     /accounts/exits             controllers.Signup.exists()
+GET     /accounts/exists            controllers.Signup.exists()
 GET     /accounts/password/:token   controllers.Signup.resetPassword(token)
 GET     /accounts/verify/:token     controllers.Signup.verify(token)
 GET     /accounts/unverified        controllers.Signup.unverified()

@@ -31,13 +31,14 @@ import play.mvc.Http.Session;
 import play.mvc.Result;
 import play.mvc.Security.Authenticated;
 import views.html.index;
-import views.html.loginlist;
+import views.html.login;
 import views.html.showimage;
 import views.html.showother;
 import views.html.showtext;
 import views.html.signup;
 import views.html.uploadlist;
 import biz.info_cloud.filesharer.providers.MyUsernamePasswordAuthProvider;
+import biz.info_cloud.filesharer.providers.MyUsernamePasswordAuthProvider.MyLogin;
 import biz.info_cloud.filesharer.providers.MyUsernamePasswordAuthProvider.MySignup;
 import biz.info_cloud.filesharer.service.FileStoreService;
 import biz.info_cloud.filesharer.service.FileStoreService.StoredFile;
@@ -45,7 +46,7 @@ import biz.info_cloud.web.utils.ContentsUtils;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.feth.play.module.pa.PlayAuthenticate;
-import com.feth.play.module.pa.providers.AuthProvider;
+import com.feth.play.module.pa.controllers.Authenticate;
 import com.feth.play.module.pa.providers.oauth2.google.GoogleAuthProvider;
 import com.feth.play.module.pa.user.AuthUser;
 
@@ -70,25 +71,35 @@ public class Application extends Controller {
     return ok(index.render());
   }
   
-  public static Result loginList() {
-    AuthProvider p = PlayAuthenticate.getProvider(SPNEGO_PROVIDER_KEY);
-    if (p != null) {
-      return redirect(com.feth.play.module.pa.controllers.routes.Authenticate.authenticate(SPNEGO_PROVIDER_KEY));
-    }
-    return ok(loginlist.render());
+  public static Result login() {
+    return ok(login.render(MyUsernamePasswordAuthProvider.LOGIN_FORM));
+  }
+  
+  public static Promise<Result> doLogin() {
+    return Promise.promise(() -> {
+      Authenticate.noCache(response());
+      final Form<MyLogin> filledForm =
+          MyUsernamePasswordAuthProvider.LOGIN_FORM.bindFromRequest();
+      if (filledForm.hasErrors()) {
+        return badRequest(login.render(filledForm));
+      }
+      return MyUsernamePasswordAuthProvider.handleLogin(ctx());
+    });
   }
   
   public static Result signup() {
     return ok(signup.render(MyUsernamePasswordAuthProvider.SIGNUP_FORM));
   }
   
-  public static Result doSignup() {
-    com.feth.play.module.pa.controllers.Authenticate.noCache(response());
-    final Form<MySignup> filledForm = MyUsernamePasswordAuthProvider.SIGNUP_FORM.bindFromRequest();
-    if (filledForm.hasErrors()) {
-      return badRequest(signup.render(filledForm));
-    }
-    return MyUsernamePasswordAuthProvider.handleSignup(ctx());
+  public static Promise<Result> doSignup() {
+    return Promise.promise(() -> {
+      Authenticate.noCache(response());
+      final Form<MySignup> filledForm = MyUsernamePasswordAuthProvider.SIGNUP_FORM.bindFromRequest();
+      if (filledForm.hasErrors()) {
+        return badRequest(signup.render(filledForm));
+      }
+      return MyUsernamePasswordAuthProvider.handleSignup(ctx());
+    });
   }
   
   public static Promise<Result> upload() {
@@ -115,7 +126,7 @@ public class Application extends Controller {
   }
   
   public static Result oAuthDenied(final String session) {
-    com.feth.play.module.pa.controllers.Authenticate.noCache(response());
+    Authenticate.noCache(response());
     flash(MessageKey.FLASH_ERROR_KEY,
           "You need to accept the OAuth connection in order to use this website!");
     return redirect(routes.Application.index());

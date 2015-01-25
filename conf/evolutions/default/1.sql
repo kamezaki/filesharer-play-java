@@ -36,6 +36,7 @@ create table users (
   id                        bigint not null,
   email                     varchar(255),
   name                      varchar(255),
+  last_login                timestamp,
   active                    boolean,
   email_validated           boolean,
   constraint pk_users primary key (id))
