@@ -15,11 +15,16 @@ GET     /show/*file                 controllers.Application.show(file)
 POST    /delete/*file               controllers.Application.delete(file)
 
 GET     /accounts/exists            controllers.Signup.exists()
-GET     /accounts/password/:token   controllers.Signup.resetPassword(token)
+GET     /accounts/password/reset/:token   controllers.Signup.resetPassword(token)
+POST    /accounts/password/reset    controllers.Signup.doResetPassword()
 GET     /accounts/verify/:token     controllers.Signup.verify(token)
 GET     /accounts/unverified        controllers.Signup.unverified()
 
+GET     /login/password/forgot      controllers.Signup.forgotPassword(email: String ?= "")
+POST    /login/password/forgot      controllers.Signup.doForgotPassword
+
 # Map static resources from the /public folder to the /assets URL path
+GET     /assets/javascript/routes.js  controllers.Application.jsRoutes
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
 GET     /webjars/*file              controllers.WebJarAssets.at(file)
 

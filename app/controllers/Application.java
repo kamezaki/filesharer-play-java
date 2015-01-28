@@ -16,6 +16,7 @@ import models.User;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 
+import play.Routes;
 import play.data.Form;
 import play.filters.csrf.AddCSRFToken;
 import play.filters.csrf.RequireCSRFCheck;
@@ -69,6 +70,13 @@ public class Application extends Controller {
   
   public static Result index() {
     return ok(index.render());
+  }
+  
+  public static Result jsRoutes() {
+    return ok(Routes.javascriptRouter(
+        "jsRoutes",
+        controllers.routes.javascript.Signup.forgotPassword()))
+        .as("text/javascript");
   }
   
   public static Result login() {

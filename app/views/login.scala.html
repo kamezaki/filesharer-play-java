@@ -1,13 +1,13 @@
 @(loginForm: Form[_])
 
 @import helper._
-@implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-xs-6", "col-md-4") }
+@implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-sm-3", "col-sm-9") }
 @import com.feth.play.module.pa.views.html._
 
 @main("Filesharer - Login") {
 <div class="container">
   <div class="row">
-    <div class="col-xs-6 col-sm-4">
+    <div class="col-xs-12 text-center">
       <h1>Login</h1>
     </div>
   </div>
@@ -23,8 +23,10 @@
       @b3.password( loginForm("password"), '_label -> "Password", 'placeholder -> "Password" )
       @b3.submit('class -> "btn btn-default"){ Login now }
 
-      <a href="javascript:void(0);" onclick="window.location.href = jsRoutes.controllers.Signup.forgotPassword($('#email').val() || null).absoluteURL();">Forgot your password?</a>
     }
+    <div class="text-right">
+      <a href="javascript:void(0);" onclick="window.location.href = jsRoutes.controllers.Signup.forgotPassword($('#email').val() || null).absoluteURL();">Forgot your password?</a>
+    </div>
   </div>
   
   <div class="row">
@@ -42,7 +44,9 @@
         }
         @providerAvailable("password") { available: Boolean =>
           @if(available) {
+            <div class="text-center">
               <a href="@controllers.routes.Application.signup()"><button type="button" class="btn btn-primary btn-lg">Signup by email</button></a>
+            </div>
           }
         }
       }

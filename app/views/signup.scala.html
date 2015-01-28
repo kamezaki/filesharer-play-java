@@ -1,12 +1,12 @@
 @(signupForm: Form[_])
 
 @import helper._
-@implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-xs-6", "col-md-4") }
+@implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-sm-2", "col-sm-10") }
 
 @main("Filesharer - signup") {
-
+<div class="container">
   <div class="row">
-    <div class="col-xs-12 col-sm-6 col-md-8">
+    <div class="col-xs-12">
       <h1>Sign up</h1>
     </div>
   </div>
@@ -25,5 +25,5 @@
       @b3.submit('class -> "btn btn-default"){ Sign in }
     }
   </div>
-
+</div>
 }
