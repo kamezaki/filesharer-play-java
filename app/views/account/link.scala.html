@@ -1,0 +1,20 @@
+@import com.feth.play.module.pa.views.html._
+
+@main("Link account") {
+<div class="container">
+  <div class="row">
+    <h1>Link account</h1>
+  </div>
+  
+  <div class="row">
+    @forProviders() { p =>
+      @if(controllers.Application.providerMap.containsKey(p.getKey())) {
+        <a href="@p.getUrl()"><img src="@routes.Assets.at(controllers.Application.providerMap.get(p.getKey()))" alt="@p.getKey()" class="img-responsive" /></a></li>
+      } else {
+        <a href="@p.getUrl()"><button type="button" class="btn btn-primary btn-lg">@p.getKey()</button></a>
+      }
+    }
+  </div>
+    
+</div>
+}

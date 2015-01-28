@@ -59,8 +59,7 @@ public class Global extends GlobalSettings {
 
       @Override
       public Call askLink() {
-        // We don't support moderated account linking in this application.
-        return null;
+        return routes.Account.askLink();
       }
 
       @Override
