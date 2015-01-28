@@ -15,6 +15,12 @@ public class MyUsernamePasswordAuthUser
     this.name = signup.name;
   }
 
+  // used for password reset only - do not use this to sign up a user.
+  public MyUsernamePasswordAuthUser(final String password) {
+    super(password, null);
+    name = null;
+  }
+  
   @Override
   public String getName() {
     return name;

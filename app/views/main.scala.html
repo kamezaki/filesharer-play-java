@@ -17,8 +17,7 @@
 
   <body>
     @topmenu()
-    @content
-
+    
     <div class="container">
       @if(flash.contains(MessageKey.FLASH_ERROR_KEY)) {
         <br />
@@ -37,6 +36,8 @@
       }
     </div>
     
+    @content
+
     <div class="container-fluid">
       <div class="row"><hr /></div>
       <div class="row">

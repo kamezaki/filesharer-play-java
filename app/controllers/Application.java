@@ -3,6 +3,11 @@ package controllers;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
@@ -33,6 +38,7 @@ import play.mvc.Result;
 import play.mvc.Security.Authenticated;
 import views.html.index;
 import views.html.login;
+import views.html.profile;
 import views.html.showimage;
 import views.html.showother;
 import views.html.showtext;
@@ -107,6 +113,14 @@ public class Application extends Controller {
         return badRequest(signup.render(filledForm));
       }
       return MyUsernamePasswordAuthProvider.handleSignup(ctx());
+    });
+  }
+  
+  @Authenticated(Secured.class)
+  public static Promise<Result> profile() {
+    return Promise.promise(() -> {
+      final User localUser = getLocalUser(session());
+      return ok(profile.render(localUser));
     });
   }
   
@@ -283,6 +297,17 @@ public class Application extends Controller {
     } else {
       return ShowType.OTHER;
     }
+  }
+  
+  public static String formatTimestamp(final long t) {
+    Instant instant = Instant.ofEpochMilli(t);
+    OffsetDateTime offsetDateTime = OffsetDateTime.ofInstant(instant, ZoneOffset.systemDefault());
+    return DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(offsetDateTime.toLocalDateTime());
+  }
+  
+  public static String formatTimestamp(Timestamp t) {
+    return DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(t.toLocalDateTime());
+    
   }
   
   public static class MissingFileException extends IOException {

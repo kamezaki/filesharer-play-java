@@ -64,8 +64,7 @@ public class Global extends GlobalSettings {
 
       @Override
       public Call askMerge() {
-        // We don't support moderated account merging in this application.
-        return null;
+        return routes.Account.askMerge();
       }
 
       @Override
