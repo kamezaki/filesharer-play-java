@@ -15,6 +15,7 @@ import play.libs.F.Promise;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.account.ask_link;
+import views.html.account.ask_merge;
 import views.html.account.link;
 
 public class Account extends Controller {
@@ -57,6 +58,40 @@ public class Account extends Controller {
         flash(MessageKey.FLASH_MESSAGE_KEY, "Account linked successfully");
       }
       return PlayAuthenticate.link(ctx(), link);
+    });
+  }
+  
+  @SubjectPresent
+  public static Promise<Result> askMerge() {
+    return Promise.promise(() -> {
+      Authenticate.noCache(response());
+      final AuthUser aUser = PlayAuthenticate.getLinkUser(session());
+      final AuthUser bUser = PlayAuthenticate.getMergeUser(session());
+      if (bUser == null) {
+        return redirect(routes.Application.index());
+      }
+      return ok(ask_merge.render(ACCEPT_FORM, aUser, bUser));
+    });
+  }
+  
+  @SubjectPresent
+  public static Promise<Result> doMerge() {
+    return Promise.promise(() -> {
+      Authenticate.noCache(response());
+      final AuthUser aUser = PlayAuthenticate.getLinkUser(session());
+      final AuthUser bUser = PlayAuthenticate.getMergeUser(session());
+      if (bUser == null) {
+        return redirect(routes.Application.index());
+      }
+      final Form<Accept> filledForm = ACCEPT_FORM.bindFromRequest();
+      if (filledForm.hasGlobalErrors()) {
+        return badRequest(ask_merge.render(filledForm, aUser, bUser));
+      }
+      final boolean merge = filledForm.get().accept;
+      if (merge) {
+        flash(MessageKey.FLASH_MESSAGE_KEY, "Accounts merged successfully");
+      }
+      return PlayAuthenticate.merge(ctx(), merge);
     });
   }
   
