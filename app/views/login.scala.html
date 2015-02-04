@@ -12,22 +12,27 @@
     </div>
   </div>
 
-  <div id="login" class="row">
-    @b3.form(routes.Application.doLogin) {
-      @if(loginForm.hasGlobalErrors) {
-        <p class="alert alert-danger">
-          @loginForm.globalError.message
-        </p>
-      }
-      @b3.email( loginForm("email"), '_label -> "Email", 'placeholder -> "example@mail.com" )
-      @b3.password( loginForm("password"), '_label -> "Password", 'placeholder -> "Password" )
-      @b3.submit('class -> "btn btn-default"){ Login now }
+  @providerAvailable("password") { available: Boolean =>
+    @if(available) {
+      <div id="login" class="row">
+        @b3.form(routes.Application.doLogin) {
+          @if(loginForm.hasGlobalErrors) {
+            <p class="alert alert-danger">
+              @loginForm.globalError.message
+            </p>
+          }
+          @b3.email( loginForm("email"), '_label -> "Email", 'placeholder -> "example@mail.com" )
+          @b3.password( loginForm("password"), '_label -> "Password", 'placeholder -> "Password" )
+          @b3.submit('class -> "btn btn-default"){ Login now }
 
+        }
+        <div class="text-right">
+          <a href="javascript:void(0);" onclick="window.location.href = jsRoutes.controllers.Signup.forgotPassword($('#email').val() || null).absoluteURL();">Forgot your password?</a>
+        </div>
+      </div>
     }
-    <div class="text-right">
-      <a href="javascript:void(0);" onclick="window.location.href = jsRoutes.controllers.Signup.forgotPassword($('#email').val() || null).absoluteURL();">Forgot your password?</a>
-    </div>
-  </div>
+  }
+
   
   <div class="row">
     <div class="center-block" style="width:300px">
@@ -35,19 +40,21 @@
       @if(auth != null) {
         you already logged in.
       } else {
-        @forProviders() { p =>
-          @if(controllers.Application.providerMap.containsKey(p.getKey())) {
-              <a href="@p.getUrl()"><img src="@routes.Assets.at(controllers.Application.providerMap.get(p.getKey()))" alt="@p.getKey()" class="img-responsive" /></a></li>
-          } else {
-              <a href="@p.getUrl()"><button type="button" class="btn btn-primary btn-lg">@p.getKey()</button></a>
-          }
-        }
         @providerAvailable("password") { available: Boolean =>
           @if(available) {
             <div class="text-center">
-              <a href="@controllers.routes.Application.signup()"><button type="button" class="btn btn-primary btn-lg">Signup by email</button></a>
+              <a href="@controllers.routes.Application.signup()"><button type="button" class="btn btn-primary btn-lg">Sign up by email</button></a>
             </div>
           }
+        }
+        @forProviders() { p =>
+          <div class="text-center">
+          @if(controllers.Application.providerMap.containsKey(p.getKey())) {
+            <a href="@p.getUrl()"><img src="@routes.Assets.at(controllers.Application.providerMap.get(p.getKey()))" alt="@p.getKey()" class="img-responsive" /></a></li>
+          } else {
+            <a href="@p.getUrl()"><button type="button" class="btn btn-primary btn-lg">@p.getKey()</button></a>
+          }
+          </div>
         }
       }
     }
