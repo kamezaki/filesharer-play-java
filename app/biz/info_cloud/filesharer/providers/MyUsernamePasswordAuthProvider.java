@@ -9,6 +9,7 @@ import models.TokenAction;
 import models.TokenAction.Type;
 import models.User;
 
+import com.amazonaws.util.StringUtils;
 import com.feth.play.module.mail.Mailer.Mail.Body;
 import com.feth.play.module.pa.PlayAuthenticate;
 import com.feth.play.module.pa.providers.password.UsernamePasswordAuthProvider;
@@ -29,12 +30,15 @@ import play.mvc.Http.Context;
 public class MyUsernamePasswordAuthProvider
   extends UsernamePasswordAuthProvider<String, MyLoginUsernamePasswordAuthUser, MyUsernamePasswordAuthUser, MyUsernamePasswordAuthProvider.MyLogin, MyUsernamePasswordAuthProvider.MySignup>
 {
+  private static final int DEFAULT_HTTP_PORT = 80;
   private static final String SETTING_KEY_VERIFICATION_LINK_SECURE =
       SETTING_KEY_MAIL + "." + "verificationLink.secure";
   private static final String SETTING_KEY_PASSWORD_RESET_LINK_SECURE =
       SETTING_KEY_MAIL + "." + "passwordResetLink.secure";
   private static final String SETTING_KEY_LINK_LOGIN_AFTER_PASSWORD_RESET =
       "loginAfterPasswordReset";
+  private static final String SETTING_KEY_URL_HOST="urlHost";
+  private static final String SETTING_KEY_URL_PORT="urlPort";
 
   private static final String EMAIL_TEMPLATE_FALLBACK_LANGUAGE = "en";
   
@@ -102,10 +106,25 @@ public class MyUsernamePasswordAuthProvider
   protected String generatePasswordResetSubject(final User user, final Context context) {
     return "Reset password";
   }
+  
+  private String getUrl(Call call, boolean isSecure, Context context) {
+    final String host = getConfiguration().getString(SETTING_KEY_URL_HOST);
+    if (StringUtils.isNullOrEmpty(host)) {
+      return call.absoluteURL(context.request(), isSecure);
+    }
+
+    final String schema = isSecure ? "https" : "http";
+    final int port = getConfiguration().getInt(SETTING_KEY_URL_PORT, DEFAULT_HTTP_PORT);
+    if (port != DEFAULT_HTTP_PORT) {
+      return String.format("%s://%s:%d/%s", schema, host, port, call.url());
+    } else {
+      return String.format("%s://%s/%s", schema, host, call.url());
+    }
+  }
+  
   protected Body generatePasswordResetMailingBody(final String token, final User user, final Context context) {
     final boolean isSecure = getConfiguration().getBoolean(SETTING_KEY_PASSWORD_RESET_LINK_SECURE);
-    final String url = routes.Signup.resetPassword(token)
-                                    .absoluteURL(context.request(), isSecure);
+    final String url = getUrl(routes.Signup.resetPassword(token), isSecure, context);
     final String langCode = getPrefferdLangCode(context);
     final String html = getEmailTemplate(
         "views.html.account.email.password_reset",
@@ -142,8 +161,7 @@ public class MyUsernamePasswordAuthProvider
       final String token, final User user, final Context context) {
     final boolean isSecure =
         getConfiguration().getBoolean(SETTING_KEY_VERIFICATION_LINK_SECURE);
-    final String url = routes.Signup.verify(token)
-                                    .absoluteURL(context.request(), isSecure);
+    final String url = getUrl(routes.Signup.verify(token), isSecure, context);
     final String langCode = getPrefferdLangCode(context);
     final String html = getEmailTemplate(
         "views.html.account.email.verify_email",
@@ -160,8 +178,7 @@ public class MyUsernamePasswordAuthProvider
       final String token, final MyUsernamePasswordAuthUser authUser, final Context context) {
     final boolean isSecure =
         getConfiguration().getBoolean(SETTING_KEY_VERIFICATION_LINK_SECURE);
-    final String url = routes.Signup.verify(token)
-                                    .absoluteURL(context.request(), isSecure);
+    final String url = getUrl(routes.Signup.verify(token), isSecure, context);
     
     final String langCode = getPrefferdLangCode(context);
     final String html = getEmailTemplate(
