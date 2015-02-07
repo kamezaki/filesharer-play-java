@@ -8,6 +8,7 @@ import models.LinkedAccount;
 import models.TokenAction;
 import models.TokenAction.Type;
 import models.User;
+import biz.info_cloud.filesharer.LocalConfig;
 
 import com.amazonaws.util.StringUtils;
 import com.feth.play.module.mail.Mailer.Mail.Body;
@@ -80,6 +81,13 @@ public class MyUsernamePasswordAuthProvider
     return getEmailName(user.email, user.name);
   }
   
+  private boolean getSecureSetting(final String key) {
+    if (LocalConfig.getForceHttps()) {
+      return true;
+    }
+    return getConfiguration().getBoolean(key);
+  }
+  
   @Override
   protected String generateVerificationRecord(
       final MyUsernamePasswordAuthUser authUser) {
@@ -123,7 +131,7 @@ public class MyUsernamePasswordAuthProvider
   }
   
   protected Body generatePasswordResetMailingBody(final String token, final User user, final Context context) {
-    final boolean isSecure = getConfiguration().getBoolean(SETTING_KEY_PASSWORD_RESET_LINK_SECURE);
+    final boolean isSecure = getSecureSetting(SETTING_KEY_PASSWORD_RESET_LINK_SECURE);
     final String url = getUrl(routes.Signup.resetPassword(token), isSecure, context);
     final String langCode = getPrefferdLangCode(context);
     final String html = getEmailTemplate(
@@ -159,8 +167,7 @@ public class MyUsernamePasswordAuthProvider
   
   protected Body getVerifyEmailMailingBodyAfterSignup(
       final String token, final User user, final Context context) {
-    final boolean isSecure =
-        getConfiguration().getBoolean(SETTING_KEY_VERIFICATION_LINK_SECURE);
+    final boolean isSecure = getSecureSetting(SETTING_KEY_VERIFICATION_LINK_SECURE);
     final String url = getUrl(routes.Signup.verify(token), isSecure, context);
     final String langCode = getPrefferdLangCode(context);
     final String html = getEmailTemplate(
@@ -176,8 +183,7 @@ public class MyUsernamePasswordAuthProvider
   @Override
   protected Body getVerifyEmailMailingBody(
       final String token, final MyUsernamePasswordAuthUser authUser, final Context context) {
-    final boolean isSecure =
-        getConfiguration().getBoolean(SETTING_KEY_VERIFICATION_LINK_SECURE);
+    final boolean isSecure = getSecureSetting(SETTING_KEY_VERIFICATION_LINK_SECURE);
     final String url = getUrl(routes.Signup.verify(token), isSecure, context);
     
     final String langCode = getPrefferdLangCode(context);

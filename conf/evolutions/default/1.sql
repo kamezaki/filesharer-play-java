@@ -1,5 +1,3 @@
-# --- Created by Ebean DDL
-
 # --- !Ups
 
 create table linked_account (
