@@ -11,6 +11,7 @@ libraryDependencies ++= Seq(
   "org.webjars" % "jquery" % "1.11.2",
   "org.webjars" % "bootstrap" % "3.3.1",
   "org.webjars" % "dropzone" % "3.10.2",
+  "org.webjars" % "momentjs" % "2.9.0",
   "be.objectify" % "deadbolt-java_2.11" % "2.3.2",
   "com.adrianhurt" % "play-bootstrap3_2.11" % "0.3",
   "com.feth" %% "play-authenticate" % "0.6.8",

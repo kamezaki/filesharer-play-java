@@ -33,7 +33,7 @@ GET     /login/password/forgot      controllers.Signup.forgotPassword(email: Str
 POST    /login/password/forgot      controllers.Signup.doForgotPassword
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/javascript/routes.js  controllers.Application.jsRoutes
+GET     /assets/javascripts/routes.js  controllers.Application.jsRoutes
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
 GET     /webjars/*file              controllers.WebJarAssets.at(file)
 

@@ -24,7 +24,9 @@
         <td>
           <div class="col-xs-1 col-sm-1 col-md-1"><input type="checkbox" name="@controllers.Application.DeleteParam" value="@file.filePath"></div>
           <div class="col-xs-11 col-sm-11 col-md-6"><a href="@controllers.routes.Application.show(file.filePath)" target="_blank">@Html(file.originalFilename)</a></div>
-          <div class="col-xs-12 col-sm-6 col-md-3">@Application.formatTimestamp(file.createDate)</div>
+          <div class="col-xs-12 col-sm-6 col-md-3">
+            <script>document.write(toLocalDateTime(@file.createDate.getTime(), 'lll'));</script>
+          </div>
           <div class="col-xs-11 col-sm-5 col-md-2">@Html(file.owner.name)</div>
         </td>
       </tr>
