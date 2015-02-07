@@ -9,12 +9,17 @@
     <p>
     Your name is &quot;@localUser.name&quot; and your email address is @if(!localUser.email) {<em>&lt;unknown&gt;</em>.} else {
       &lt;@localUser.email&gt;
-      <i>
-      @if(!localUser.emailValidated && localUser.email) {
-        (<a href="@routes.Account.verifyEmail">unverified - click to verify</a>)
-      } else {
-        (verified)
-      }.</i>
+      @providerAvailable("password") { available =>
+        @if(available) {
+          <i>
+          @if(!localUser.emailValidated && localUser.email) {
+            (<a href="@routes.Account.verifyEmail">unverified - click to verify</a>)
+          } else {
+            (verified)
+          }.</i>
+        }
+      }
+      
     }
     <br />
     @defining(localUser.getProviders()) { providers =>
@@ -40,9 +45,13 @@
       }
     }
     <br/>
-    <ul>
-      <li><a href="@routes.Account.changePassword">Change/set a password for your account</a></li>
-    </ul>
+    @providerAvailable("password") { available =>
+      @if(available) {
+        <ul>
+          <li><a href="@routes.Account.changePassword">Change/set a password for your account</a></li>
+        </ul>
+      }
+    }
     </p>
   </div>
 </div>
