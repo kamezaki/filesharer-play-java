@@ -3,11 +3,6 @@ package controllers;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -333,12 +328,6 @@ public class Application extends Controller {
     }
   }
   
-  public static String formatTimestamp(final long t) {
-    Instant instant = Instant.ofEpochMilli(t);
-    OffsetDateTime offsetDateTime = OffsetDateTime.ofInstant(instant, ZoneOffset.systemDefault());
-    return DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(offsetDateTime.toLocalDateTime());
-  }
-
   public static class MissingFileException extends IOException {
     private static final long serialVersionUID = -6916009604118436445L;
 

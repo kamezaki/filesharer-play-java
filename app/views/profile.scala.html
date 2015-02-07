@@ -39,7 +39,8 @@
     @currentAuth() { auth =>
       You are currently logged in with: @_providerIcon(auth.getProvider())<br/>
       @if(auth.expires() != -1){
-        Your user ID is @auth.getId() and your session will expire on @Application.formatTimestamp(auth.expires())
+        Your user ID is @auth.getId() and your session will expire on 
+        <script>document.write(toLocalDateTime(@auth.expires(), 'lll'));</script>
       } else {
         Your user ID is @auth.getId() and your session will not expire, as it is endless
       }
