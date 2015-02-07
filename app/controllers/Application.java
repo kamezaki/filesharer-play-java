@@ -338,12 +338,7 @@ public class Application extends Controller {
     OffsetDateTime offsetDateTime = OffsetDateTime.ofInstant(instant, ZoneOffset.systemDefault());
     return DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(offsetDateTime.toLocalDateTime());
   }
-  
-  public static String formatTimestamp(Timestamp t) {
-    return DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(t.toLocalDateTime());
-    
-  }
-  
+
   public static class MissingFileException extends IOException {
     private static final long serialVersionUID = -6916009604118436445L;
 
