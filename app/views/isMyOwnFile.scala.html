@@ -1,0 +1,5 @@
+@(relativePath: String)(body: Boolean => play.twirl.api.Html)
+
+@defining(boolean2Boolean(controllers.Application.isMyOwn(relativePath, session()))) { owned: Boolean =>
+  @body(owned)
+}

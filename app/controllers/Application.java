@@ -174,6 +174,19 @@ public class Application extends Controller {
     return User.findByAuthUserIdentity(authUser);
   }
   
+  public static boolean isMyOwn(final String relativePath, final Session session) {
+    User user = getLocalUser(session);
+    if (user == null) {
+      return false;
+    }
+    final FileStoreService service = new FileStoreService();
+    StoredFile storedFile = service.getStoredFile(relativePath);
+    if (!storedFile.exists()) {
+      return false;
+    }
+    return service.isOwndFile(storedFile, user);
+  }
+  
   private static StoredFile getFile(final String filename) {
     final FileStoreService service = new FileStoreService();
     return service.getStoredFile(filename);
