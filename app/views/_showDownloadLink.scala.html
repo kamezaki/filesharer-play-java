@@ -1,0 +1,18 @@
+@(relativePath: String, originalName: String)
+
+@import helper._
+
+<div class="row">
+  <div class="col-xs-11">
+    Download from <a href="@routes.Application.sharer(relativePath).url?@controllers.Application.DownloadParam">@originalName</a>
+  </div>
+  <div class="col-xs-1">
+  @isMyOwnFile(relativePath) { owned => 
+    <form action="@routes.Application.delete" method="POST">
+      @CSRF.formField
+      <input type="hidden" name="@controllers.Application.DeleteParam" value="@relativePath">
+      <button type="submit" class="btn btn-sm btn-danger"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
+    </form>
+  }
+  </div>
+</div>

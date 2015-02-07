@@ -12,12 +12,32 @@
     <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("dropzone.min.js"))'></script>
     <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("jquery.min.js"))'></script>
     <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("js/bootstrap.min.js"))'></script>
+     <script type="text/javascript" src="@routes.Application.jsRoutes" defer="defer"></script>
   </head>
 
   <body>
     @topmenu()
-    @content
     
+    <div class="container">
+      @if(flash.contains(MessageKey.FLASH_ERROR_KEY)) {
+        <br />
+        <div class="alert alert-danger" role="alert">
+          <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+          @flash().get(MessageKey.FLASH_ERROR_KEY)
+        </div>
+      }
+      
+      @if(flash.contains(MessageKey.FLASH_MESSAGE_KEY)) {
+        <br />
+        <div class="alert alert-success" role="alert">
+          <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+          @flash().get(MessageKey.FLASH_MESSAGE_KEY)
+        </div>
+      }
+    </div>
+    
+    @content
+
     <div class="container-fluid">
       <div class="row"><hr /></div>
       <div class="row">

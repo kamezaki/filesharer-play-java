@@ -2,12 +2,10 @@
 
 @main("File sharer - share file") {
 <div class="container">
-  <div class="row">
-    Download from <a href="/sharer/@relativePath?@controllers.Application.DownloadParam">@originalName</a>
-  </div>
+  @_showDownloadLink(relativePath, originalName)
   <div class="row"><hr /></div>
   <div class="row">
-    <img src="/sharer/@relativePath" class="img-responsive" />
+    <img src="@routes.Application.sharer(relativePath).url" class="img-responsive" />
   </div>
 </div>
 }

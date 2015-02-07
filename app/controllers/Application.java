@@ -3,6 +3,12 @@ package controllers;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
@@ -16,6 +22,9 @@ import models.User;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 
+import play.Logger;
+import play.Routes;
+import play.data.Form;
 import play.filters.csrf.AddCSRFToken;
 import play.filters.csrf.RequireCSRFCheck;
 import play.libs.F;
@@ -31,17 +40,22 @@ import play.mvc.Result;
 import play.mvc.Security.Authenticated;
 import views.html.index;
 import views.html.login;
+import views.html.profile;
 import views.html.showimage;
 import views.html.showother;
 import views.html.showtext;
+import views.html.signup;
 import views.html.uploadlist;
+import biz.info_cloud.filesharer.providers.MyUsernamePasswordAuthProvider;
+import biz.info_cloud.filesharer.providers.MyUsernamePasswordAuthProvider.MyLogin;
+import biz.info_cloud.filesharer.providers.MyUsernamePasswordAuthProvider.MySignup;
 import biz.info_cloud.filesharer.service.FileStoreService;
 import biz.info_cloud.filesharer.service.FileStoreService.StoredFile;
 import biz.info_cloud.web.utils.ContentsUtils;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.feth.play.module.pa.PlayAuthenticate;
-import com.feth.play.module.pa.providers.AuthProvider;
+import com.feth.play.module.pa.controllers.Authenticate;
 import com.feth.play.module.pa.providers.oauth2.google.GoogleAuthProvider;
 import com.feth.play.module.pa.user.AuthUser;
 
@@ -50,6 +64,7 @@ public class Application extends Controller {
   public static final String FallbackModeParam = "fallback-mode";
   public static final String JsonPathParam = "path";
   public static final String DownloadParam = "download";
+  public static final String DeleteParam = "deleteFiles";
   
   public static final String SPNEGO_PROVIDER_KEY = "spnego";
   
@@ -66,12 +81,50 @@ public class Application extends Controller {
     return ok(index.render());
   }
   
+  public static Result jsRoutes() {
+    return ok(Routes.javascriptRouter(
+        "jsRoutes",
+        controllers.routes.javascript.Signup.forgotPassword()))
+        .as("text/javascript");
+  }
+  
   public static Result login() {
-    AuthProvider p = PlayAuthenticate.getProvider(SPNEGO_PROVIDER_KEY);
-    if (p != null) {
-      return redirect(com.feth.play.module.pa.controllers.routes.Authenticate.authenticate(SPNEGO_PROVIDER_KEY));
-    }
-    return ok(login.render());
+    return ok(login.render(MyUsernamePasswordAuthProvider.LOGIN_FORM));
+  }
+  
+  public static Promise<Result> doLogin() {
+    return Promise.promise(() -> {
+      Authenticate.noCache(response());
+      final Form<MyLogin> filledForm =
+          MyUsernamePasswordAuthProvider.LOGIN_FORM.bindFromRequest();
+      if (filledForm.hasErrors()) {
+        return badRequest(login.render(filledForm));
+      }
+      return MyUsernamePasswordAuthProvider.handleLogin(ctx());
+    });
+  }
+  
+  public static Result signup() {
+    return ok(signup.render(MyUsernamePasswordAuthProvider.SIGNUP_FORM));
+  }
+  
+  public static Promise<Result> doSignup() {
+    return Promise.promise(() -> {
+      Authenticate.noCache(response());
+      final Form<MySignup> filledForm = MyUsernamePasswordAuthProvider.SIGNUP_FORM.bindFromRequest();
+      if (filledForm.hasErrors()) {
+        return badRequest(signup.render(filledForm));
+      }
+      return MyUsernamePasswordAuthProvider.handleSignup(ctx());
+    });
+  }
+  
+  @Authenticated(Secured.class)
+  public static Promise<Result> profile() {
+    return Promise.promise(() -> {
+      final User localUser = getLocalUser(session());
+      return ok(profile.render(localUser));
+    });
   }
   
   public static Promise<Result> upload() {
@@ -87,18 +140,18 @@ public class Application extends Controller {
     return Promise.promise(() -> new FileStoreService().getUploadList(user))
                   .map(list -> ok(uploadlist.render(list)));
   }
-  
+
   @RequireCSRFCheck
   @Authenticated(Secured.class)
-  public static Promise<Result> delete(final String filename) {
+  public static Promise<Result> delete() {
     return Promise.promise(() -> {
-      new FileStoreService().delete(filename);
+      deleteOwnedFiles(request(), session());
       return redirect(routes.Application.uploadList());
     });
   }
   
   public static Result oAuthDenied(final String session) {
-    com.feth.play.module.pa.controllers.Authenticate.noCache(response());
+    Authenticate.noCache(response());
     flash(MessageKey.FLASH_ERROR_KEY,
           "You need to accept the OAuth connection in order to use this website!");
     return redirect(routes.Application.index());
@@ -121,9 +174,40 @@ public class Application extends Controller {
     return User.findByAuthUserIdentity(authUser);
   }
   
+  public static boolean isMyOwn(final String relativePath, final Session session) {
+    User user = getLocalUser(session);
+    if (user == null) {
+      return false;
+    }
+    final FileStoreService service = new FileStoreService();
+    StoredFile storedFile = service.getStoredFile(relativePath);
+    if (!storedFile.exists()) {
+      return false;
+    }
+    return service.isOwndFile(storedFile, user);
+  }
+  
   private static StoredFile getFile(final String filename) {
     final FileStoreService service = new FileStoreService();
     return service.getStoredFile(filename);
+  }
+
+  private static void deleteOwnedFiles(final Request request, final Session session) {
+    Map<String, String[]> params = request.body().asFormUrlEncoded();
+    if (params == null
+        || params.isEmpty()
+        || !params.containsKey(DeleteParam)) {
+      Logger.debug("could not find " + DeleteParam);
+      return;
+    }
+    
+    final FileStoreService service = new FileStoreService();
+    Arrays.asList(params.get(DeleteParam))
+          .stream()
+          .map(filename -> service.getStoredFile(filename))
+          .filter(storedFile -> storedFile.exists())
+          .filter(storedFile -> service.isOwndFile(storedFile, getLocalUser(session)))
+          .forEach(storedFile -> service.delete(storedFile));
   }
 
   private static Result responseSharer(final StoredFile file)
@@ -247,6 +331,17 @@ public class Application extends Controller {
     } else {
       return ShowType.OTHER;
     }
+  }
+  
+  public static String formatTimestamp(final long t) {
+    Instant instant = Instant.ofEpochMilli(t);
+    OffsetDateTime offsetDateTime = OffsetDateTime.ofInstant(instant, ZoneOffset.systemDefault());
+    return DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(offsetDateTime.toLocalDateTime());
+  }
+  
+  public static String formatTimestamp(Timestamp t) {
+    return DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(t.toLocalDateTime());
+    
   }
   
   public static class MissingFileException extends IOException {
