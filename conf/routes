@@ -13,7 +13,7 @@ POST    /file-upload                controllers.Application.upload()
 GET     /list                       controllers.Application.uploadList()
 GET     /sharer/*file               controllers.Application.sharer(file)
 GET     /show/*file                 controllers.Application.show(file)
-POST    /delete/*file               controllers.Application.delete(file)
+POST    /delete                     controllers.Application.delete()
 
 GET     /accounts/verify            controllers.Account.verifyEmail()
 GET     /accounts/add               controllers.Account.link()

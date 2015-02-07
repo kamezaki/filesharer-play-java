@@ -8,6 +8,7 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
@@ -21,6 +22,7 @@ import models.User;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 
+import play.Logger;
 import play.Routes;
 import play.data.Form;
 import play.filters.csrf.AddCSRFToken;
@@ -62,6 +64,7 @@ public class Application extends Controller {
   public static final String FallbackModeParam = "fallback-mode";
   public static final String JsonPathParam = "path";
   public static final String DownloadParam = "download";
+  public static final String DeleteParam = "deleteFiles";
   
   public static final String SPNEGO_PROVIDER_KEY = "spnego";
   
@@ -137,12 +140,12 @@ public class Application extends Controller {
     return Promise.promise(() -> new FileStoreService().getUploadList(user))
                   .map(list -> ok(uploadlist.render(list)));
   }
-  
+
   @RequireCSRFCheck
   @Authenticated(Secured.class)
-  public static Promise<Result> delete(final String filename) {
+  public static Promise<Result> delete() {
     return Promise.promise(() -> {
-      new FileStoreService().delete(filename);
+      deleteOwnedFiles(request(), session());
       return redirect(routes.Application.uploadList());
     });
   }
@@ -174,6 +177,24 @@ public class Application extends Controller {
   private static StoredFile getFile(final String filename) {
     final FileStoreService service = new FileStoreService();
     return service.getStoredFile(filename);
+  }
+
+  private static void deleteOwnedFiles(final Request request, final Session session) {
+    Map<String, String[]> params = request.body().asFormUrlEncoded();
+    if (params == null
+        || params.isEmpty()
+        || !params.containsKey(DeleteParam)) {
+      Logger.debug("could not find " + DeleteParam);
+      return;
+    }
+    
+    final FileStoreService service = new FileStoreService();
+    Arrays.asList(params.get(DeleteParam))
+          .stream()
+          .map(filename -> service.getStoredFile(filename))
+          .filter(storedFile -> storedFile.exists())
+          .filter(storedFile -> service.isOwndFile(storedFile, getLocalUser(session)))
+          .forEach(storedFile -> service.delete(storedFile));
   }
 
   private static Result responseSharer(final StoredFile file)
