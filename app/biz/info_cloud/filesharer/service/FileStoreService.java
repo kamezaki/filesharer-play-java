@@ -48,6 +48,22 @@ public class FileStoreService {
     return ShareFileEntity.findByOwner(user);
   }
   
+  public boolean isOwndFile(final StoredFile storedFile, final User user) {
+    if (storedFile == null || storedFile.entity == null) {
+      return false;
+    }
+    
+    if (user == null || storedFile.entity.owner == null) {
+      return false;
+    }
+    
+    return user.id == storedFile.entity.owner.id;
+  }
+  
+  public void delete(final StoredFile storedFile) {
+    delete(storedFile.getKeyPath());
+  }
+  
   public void delete(final String relativePath) {
     ShareFileEntity entity = ShareFileEntity.findByPath(relativePath);
     if (entity != null) {

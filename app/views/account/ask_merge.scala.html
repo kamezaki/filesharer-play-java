@@ -1,0 +1,34 @@
+@(acceptForm: Form[Account.Accept], aUser: com.feth.play.module.pa.user.AuthUser, bUser: com.feth.play.module.pa.user.AuthUser)
+
+@import helper._
+@implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-sm-8", "col-sm-4") }
+
+@label = {
+  Do you want to merge your current account (@aUser) with this account: @bUser?
+}
+
+@main("Filesharer - Merge accounts") {
+<div class="container">
+  <div class="row">
+    <h1>Merge accounts</h1>
+  </div>
+  
+  <div class="row">
+    @b3.form(routes.Account.doMerge) {
+      @if(acceptForm.hasGlobalErrors) {
+        <p class="alert alert-danger">
+          @acceptForm.globalError.message
+        </p>
+      }
+      @b3.radio( acceptForm("accept"), 
+                 options = Seq(
+                   "true"-> "Yes, merge these two accounts",
+                   "false"-> "No, exit my current session and log in as a new user"
+                 ),
+                 '_label -> label,
+                 '_showConstraints -> false )
+      @b3.submit('class -> "btn btn-default"){ OK }
+    }
+  </div>
+</div>
+}

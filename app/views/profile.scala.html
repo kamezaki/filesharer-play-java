@@ -1,0 +1,51 @@
+@(localUser: models.User = null)
+
+@import com.feth.play.module.pa.views.html._
+
+@main("Filesharer - User profile") {
+<div class="container">
+  <div class="row">
+    <h1>User profile</h1>
+    <p>
+    Your name is &quot;@localUser.name&quot; and your email address is @if(!localUser.email) {<em>&lt;unknown&gt;</em>.} else {
+      &lt;@localUser.email&gt;
+      <i>
+      @if(!localUser.emailValidated && localUser.email) {
+        (<a href="@routes.Account.verifyEmail">unverified - click to verify</a>)
+      } else {
+        (verified)
+      }.</i>
+    }
+    <br />
+    @defining(localUser.getProviders()) { providers =>
+        @if(providers.size() > 0) {
+          @if(providers.size() ==1) {
+            There is one provider linked with your account:
+          } else {
+            There are @providers.size().toString() providers linked with your account:
+          }
+          @for(p <- providers) {
+            @_providerIcon(p)
+          }
+          <br/>
+        }
+    }
+    <br/>
+    @currentAuth() { auth =>
+      You are currently logged in with: @_providerIcon(auth.getProvider())<br/>
+      @if(auth.expires() != -1){
+        Your user ID is @auth.getId() and your session will expire on @Application.formatTimestamp(auth.expires())
+      } else {
+        Your user ID is @auth.getId() and your session will not expire, as it is endless
+      }
+    }
+    <br/>
+    <ul>
+      <li><a href="@routes.Account.changePassword">Change/set a password for your account</a></li>
+    </ul>
+    </p>
+  </div>
+</div>
+
+    </p>
+}
