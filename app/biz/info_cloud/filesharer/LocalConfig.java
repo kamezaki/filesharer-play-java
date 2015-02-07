@@ -39,6 +39,10 @@ public class LocalConfig {
     return getStringValue("filesharer.store.type", "");
   }
   
+  public static boolean getForceHttps() {
+    return getBooleanValue("forceHttps", false);
+  }
+  
   private static String getStringValue(String key, String defaultValue) {
     String value = defaultValue;
     if (config.hasPath(key)) {
@@ -54,6 +58,14 @@ public class LocalConfig {
     }
     if (!condition.isAccpeptable(value)) {
       value = defaultValue;
+    }
+    return value;
+  }
+  
+  private static boolean getBooleanValue(String key, boolean defaultValue) {
+    boolean value = defaultValue;
+    if (config.hasPath(key)) {
+      value = config.getBoolean(key);
     }
     return value;
   }

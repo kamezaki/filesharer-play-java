@@ -1,3 +1,4 @@
+import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
 
 import com.feth.play.module.pa.PlayAuthenticate;
@@ -10,15 +11,22 @@ import play.Application;
 import play.GlobalSettings;
 import play.Logger;
 import play.libs.Akka;
+import play.libs.F;
+import play.libs.F.Promise;
+import play.mvc.Action;
 import play.mvc.Call;
+import play.mvc.Http.Context;
+import play.mvc.Http.Request;
+import play.mvc.Result;
 import scala.concurrent.duration.Duration;
 import biz.info_cloud.filesharer.LocalConfig;
 import biz.info_cloud.filesharer.service.FileStoreService;
 
 public class Global extends GlobalSettings {
+  public static final String X_FORWARDED_PROTO = "X-Forwarded-Proto";
 
   @Override
-  public void onStart(Application application) {
+  public void onStart(final Application application) {
     super.onStart(application);
     Logger.info("start application");
     int interval = LocalConfig.getScheduleFrequencyInHours();
@@ -68,7 +76,7 @@ public class Global extends GlobalSettings {
       }
 
       @Override
-      public Call onException(AuthException e) {
+      public Call onException(final AuthException e) {
         Logger.error("auth failed", e);
         if (e instanceof AccessDeniedException) {
           return routes.Application.oAuthDenied(((AccessDeniedException) e).getProviderKey());
@@ -79,9 +87,29 @@ public class Global extends GlobalSettings {
   }
 
   @Override
-  public void onStop(Application application) {
+  public void onStop(final Application application) {
     Logger.info("shutdown application");
     super.onStop(application);
   }
+
+  @Override
+  public Action<?> onRequest(final Request request, final Method actionMethod) {
+    boolean forceHttps = LocalConfig.getForceHttps();
+    if (forceHttps) {
+      String schema = request.getHeader(X_FORWARDED_PROTO);
+      if (schema != null && schema.equalsIgnoreCase("http")) {
+        return new Action.Simple() {
+          @Override
+          public Promise<Result> call(final Context ctx) throws Throwable {
+            String httpsUrl = String.format("https://%s%s", request.host(), request.path());
+            return F.Promise.pure(redirect(httpsUrl));
+          }
+          
+        };
+      }
+    }
+    return super.onRequest(request, actionMethod);
+  }
+  
   
 }
