@@ -3,6 +3,7 @@ package biz.info_cloud.filesharer.service.storage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDateTime;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.s3.AmazonS3;
@@ -16,7 +17,7 @@ import plugins.S3Plugin;
 public class S3Storage implements StorageService {
 
   @Override
-  public InputStream getInputStream(String storedName) throws IOException {
+  public InputStream getInputStream(final String storedName) throws IOException {
     try {
       checkS3Plugin();
       S3Object object = getS3().getObject(getBucket(), storedName);
@@ -27,7 +28,7 @@ public class S3Storage implements StorageService {
   }
 
   @Override
-  public String save(File file, String filename) throws IOException {
+  public String save(final File file, final String filename) throws IOException {
     try {
       checkS3Plugin();
       PutObjectRequest request =
@@ -41,7 +42,7 @@ public class S3Storage implements StorageService {
   }
   
   @Override
-  public void delete(String storedName) throws IOException {
+  public void delete(final String storedName) throws IOException {
     try {
       checkS3Plugin();
       getS3().deleteObject(getBucket(), storedName);
@@ -49,6 +50,13 @@ public class S3Storage implements StorageService {
       throw new IOException(e);
     }
   }
+  
+  @Override
+  public void cleanup(final LocalDateTime deleteDate) {
+    // do nothing
+    return;
+  }
+
 
   private void checkS3Plugin() {
     if (S3Plugin.amazonS3 == null) {

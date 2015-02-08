@@ -101,8 +101,7 @@ public class FileStoreService {
               .peek(deleteFileAction)
               .forEach(target -> target.delete());
     
-    // TODO
-    // garbage collection of storage.
+    storageService.cleanup(deleteDate);
     
     Logger.info(String.format("Delete shared files finshed [%s]", LocalDateTime.now().toString()));
   }
