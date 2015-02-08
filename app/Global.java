@@ -41,7 +41,7 @@ public class Global extends GlobalSettings {
     PlayAuthenticate.setResolver(new Resolver() {
       @Override
       public Call login() {
-        return routes.Application.index();
+        return routes.Application.login();
       }
 
       @Override
