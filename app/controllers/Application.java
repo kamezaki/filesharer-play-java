@@ -158,6 +158,7 @@ public class Application extends Controller {
                   .recover(t -> handleErrro(t));
   }
   
+  @AddCSRFToken
   public static Promise<Result> show(final String filename) {
     return Promise.promise(() -> getFile(filename))
                   .map(f -> responseShow(f))
