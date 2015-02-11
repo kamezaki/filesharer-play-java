@@ -32,7 +32,6 @@ import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Http.Request;
 import play.mvc.Http.Session;
 import play.mvc.Result;
-import play.mvc.Security.Authenticated;
 import views.html.index;
 import views.html.login;
 import views.html.profile;
@@ -41,6 +40,8 @@ import views.html.showother;
 import views.html.showtext;
 import views.html.signup;
 import views.html.uploadlist;
+import be.objectify.deadbolt.java.actions.Group;
+import be.objectify.deadbolt.java.actions.Restrict;
 import biz.info_cloud.filesharer.providers.MyUsernamePasswordAuthProvider;
 import biz.info_cloud.filesharer.providers.MyUsernamePasswordAuthProvider.MyLogin;
 import biz.info_cloud.filesharer.providers.MyUsernamePasswordAuthProvider.MySignup;
@@ -114,7 +115,7 @@ public class Application extends Controller {
     });
   }
   
-  @Authenticated(Secured.class)
+  @Restrict(@Group(UserRole.USER))
   public static Promise<Result> profile() {
     return Promise.promise(() -> {
       final User localUser = getLocalUser(session());
@@ -129,7 +130,7 @@ public class Application extends Controller {
   }
   
   @AddCSRFToken
-  @Authenticated(Secured.class)
+  @Restrict(@Group(UserRole.USER))
   public static Promise<Result> uploadList() {
     User user = getLocalUser(session());
     return Promise.promise(() -> new FileStoreService().getUploadList(user))
@@ -137,7 +138,7 @@ public class Application extends Controller {
   }
 
   @RequireCSRFCheck
-  @Authenticated(Secured.class)
+  @Restrict(@Group(UserRole.USER))
   public static Promise<Result> delete() {
     return Promise.promise(() -> {
       deleteOwnedFiles(request(), session());

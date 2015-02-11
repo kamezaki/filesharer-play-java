@@ -1,5 +1,6 @@
 @import com.feth.play.module.pa.providers.AuthProvider.Registry
 @import com.feth.play.module.pa.views.html._
+@import be.objectify.deadbolt.java.views.html._
 
 <nav class="navbar navbar-default" role="navigation">
   <div class="container-fluid">
@@ -16,24 +17,20 @@
     <div class="collapse navbar-collapse" id="topmenu">
       <ul class="nav navbar-nav navbar-left">
         @menuitem(controllers.routes.Application.index.url, "Main")
-        @currentAuth() { auth =>
-          @if(auth != null) {
-            @menuitem(controllers.routes.Application.uploadList.url, "Uploaded List")
-          }
+        @subjectPresent() {
+          @menuitem(controllers.routes.Application.uploadList.url, "Uploaded List")
         }
       </ul>
       
       @defining(Registry.getProviders()) { providers =>
         @if(providers != null && providers.size() > 0) {
           <ul class="nav navbar-nav navbar-right">
-            @currentAuth() { auth =>
-              @if(auth != null) {
-                @menuitem(controllers.routes.Application.profile.url, "Profile")
-                @menuitem(com.feth.play.module.pa.controllers.routes.Authenticate.logout.url, "Logout")
-              } else {
-                @menuitem(controllers.routes.Application.login.url, "Login")
-             }
-           }
+            @subjectPresentOr() {
+              @menuitem(controllers.routes.Application.profile.url, "Profile")
+              @menuitem(com.feth.play.module.pa.controllers.routes.Authenticate.logout.url, "Logout")
+            }{
+              @menuitem(controllers.routes.Application.login.url, "Login")
+            }
           </ul>
         }
       }

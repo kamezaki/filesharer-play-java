@@ -1,11 +1,16 @@
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import models.SecurityRole;
 
 import com.feth.play.module.pa.PlayAuthenticate;
 import com.feth.play.module.pa.PlayAuthenticate.Resolver;
 import com.feth.play.module.pa.exceptions.AccessDeniedException;
 import com.feth.play.module.pa.exceptions.AuthException;
 
+import controllers.UserRole;
 import controllers.routes;
 import play.Application;
 import play.GlobalSettings;
@@ -84,6 +89,8 @@ public class Global extends GlobalSettings {
         return super.onException(e);
       }
     });
+    
+    initilizeData();
   }
 
   @Override
@@ -111,5 +118,15 @@ public class Global extends GlobalSettings {
     return super.onRequest(request, actionMethod);
   }
   
+  private void initilizeData() {
+    List<String> roleList = Arrays.asList(UserRole.USER);
+    roleList.stream()
+            .filter(roleName -> SecurityRole.findByRoleName(roleName) == null)
+            .forEach(roleName -> {
+              final SecurityRole role = new SecurityRole();
+              role.roleName = roleName;
+              role.save();
+            });
+  }
   
 }

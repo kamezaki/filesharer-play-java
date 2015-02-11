@@ -10,6 +10,7 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -17,6 +18,9 @@ import models.TokenAction.Type;
 import play.data.format.Formats;
 import play.data.validation.Constraints;
 import play.db.ebean.Model;
+import be.objectify.deadbolt.core.models.Permission;
+import be.objectify.deadbolt.core.models.Role;
+import be.objectify.deadbolt.core.models.Subject;
 
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.ExpressionList;
@@ -26,13 +30,12 @@ import com.feth.play.module.pa.user.AuthUserIdentity;
 import com.feth.play.module.pa.user.EmailIdentity;
 import com.feth.play.module.pa.user.NameIdentity;
 
+import controllers.UserRole;
+
 @Entity
 @Table(name = "users")
-public class User extends Model {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 2L;
+public class User extends Model implements Subject {
+  private static final long serialVersionUID = 3L;
 
   @Id
   public Long id;
@@ -54,6 +57,9 @@ public class User extends Model {
 
   @OneToMany(cascade = CascadeType.ALL)
   public List<LinkedAccount> linkedAccounts;
+  
+  @ManyToMany
+  public List<SecurityRole> roles;
 
   public static final Finder<Long, User> find =
       new Finder<Long, User>(Long.class, User.class);
@@ -100,6 +106,8 @@ public class User extends Model {
 
   public static User create(final AuthUser authUser) {
     final User user = new User();
+    user.roles = Collections.singletonList(
+        SecurityRole.findByRoleName(UserRole.USER));
     user.active = true;
     user.linkedAccounts = Collections.singletonList(
         LinkedAccount.create(authUser));
@@ -122,6 +130,7 @@ public class User extends Model {
     }
 
     user.save();
+    user.saveManyToManyAssociations("roles");
     return user;
   }
 
@@ -199,5 +208,23 @@ public class User extends Model {
       final UsernamePasswordAuthUser authUser, final boolean create) {
     changePassword(authUser, create);
     TokenAction.deleteByUser(this, Type.PASSWORD_RESET);
+  }
+
+
+  @Override
+  public String getIdentifier() {
+    return Long.toString(id);
+  }
+
+
+  @Override
+  public List<? extends Permission> getPermissions() {
+    return null;
+  }
+
+
+  @Override
+  public List<? extends Role> getRoles() {
+    return roles;
   }
 }
