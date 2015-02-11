@@ -22,6 +22,7 @@
       
     }
     <br />
+    <br />
     @defining(localUser.getProviders()) { providers =>
         @if(providers.size() > 0) {
           @if(providers.size() ==1) {
@@ -46,6 +47,10 @@
       }
     }
     <br/>
+    Your last access :
+    <script>document.write(toLocalDateTime(@localUser.lastLogin.getTime(), 'lll'));</script>
+    
+    <br />
     @providerAvailable("password") { available =>
       @if(available) {
         <ul>

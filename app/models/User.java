@@ -210,6 +210,11 @@ public class User extends Model implements Subject {
     TokenAction.deleteByUser(this, Type.PASSWORD_RESET);
   }
 
+  @Override
+  public void delete() {
+    AccessLog.deleteByUser(this);
+    super.delete();
+  }
 
   @Override
   public String getIdentifier() {

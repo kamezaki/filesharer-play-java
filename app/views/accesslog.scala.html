@@ -1,0 +1,33 @@
+@(logs: List[models.AccessLog])
+
+@import helper._
+
+@main("File sharer - access files") {
+
+<div class="container">
+  @if(logs.size() < 1) {
+    num of your access : @logs.size()
+  } else {
+    <table class="table table-bordered table-striped">
+      <tr>
+        <th>
+          <div class="col-xs-12 col-sm-12 col-md-6">Filename</div>
+          <div class="col-xs-12 col-sm-6 col-md-3">Access Time</div>
+          <div class="col-xs-12 col-sm-6 col-md-3">Owner</div>
+        </th>
+      </tr>
+    @for(log <- logs) {
+      <tr>
+        <td>
+          <div class="col-xs-12 col-sm-11 col-md-6"><a href="@controllers.routes.Application.show(log.entity.filePath)" target="_blank">@Html(log.entity.originalFilename)</a></div>
+          <div class="col-xs-12 col-sm-6 col-md-3">
+            <script>document.write(toLocalDateTime(@log.lastAccess.getTime(), 'lll'));</script>
+          </div>
+          <div class="col-xs-12 col-sm-6 col-md-3">@Html(log.entity.owner.name)</div>
+        </td>
+      </tr>
+    }
+    </table>
+  }
+</div>
+}
