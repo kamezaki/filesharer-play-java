@@ -19,7 +19,7 @@
     @for(log <- logs) {
       <tr>
         <td>
-          <div class="col-xs-12 col-sm-11 col-md-6"><a href="@controllers.routes.Application.show(log.entity.filePath)" target="_blank">@Html(log.entity.originalFilename)</a></div>
+          <div class="col-xs-12 col-sm-11 col-md-6"><a href="@controllers.routes.Application.show(log.entity.filePath)">@Html(log.entity.originalFilename)</a></div>
           <div class="col-xs-12 col-sm-6 col-md-3">
             <script>document.write(toLocalDateTime(@log.lastAccess.getTime(), 'lll'));</script>
           </div>
