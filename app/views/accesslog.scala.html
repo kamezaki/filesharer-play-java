@@ -2,7 +2,7 @@
 
 @import helper._
 
-@main("File sharer - access files") {
+@main("File sharer - access files", "accesslog") {
 
 <div class="container">
   @if(logs.size() < 1) {
@@ -23,7 +23,11 @@
           <div class="col-xs-12 col-sm-6 col-md-3">
             <script>document.write(toLocalDateTime(@log.lastAccess.getTime(), 'lll'));</script>
           </div>
-          <div class="col-xs-12 col-sm-6 col-md-3">@Html(log.entity.owner.name)</div>
+          @if(log.entity.owner != null){
+            <div class="col-xs-12 col-sm-6 col-md-3">@Html(log.entity.owner.name)</div>
+          } else {
+            <div class="col-xs-12 col-sm-6 col-md-3">Guest</div>
+          }
         </td>
       </tr>
     }
