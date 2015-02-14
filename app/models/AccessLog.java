@@ -36,7 +36,7 @@ public class AccessLog extends Model {
       new Finder<>(Long.class, AccessLog.class);
   
   private static ExpressionList<AccessLog> getUserFind(final User user) {
-    return find.where().eq("user", user);
+    return find.fetch("entity").fetch("entity.owner").where().eq("user", user);
   }
   
   public static List<AccessLog> findByUser(final User user) {
