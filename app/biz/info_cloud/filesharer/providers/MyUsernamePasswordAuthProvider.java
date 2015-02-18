@@ -123,9 +123,9 @@ public class MyUsernamePasswordAuthProvider
     final String schema = isSecure ? "https" : "http";
     final int port = getConfiguration().getInt(SETTING_KEY_URL_PORT, DEFAULT_HTTP_PORT);
     if (port != DEFAULT_HTTP_PORT) {
-      return String.format("%s://%s:%d/%s", schema, host, port, call.url());
+      return String.format("%s://%s:%d%s", schema, host, port, call.url());
     } else {
-      return String.format("%s://%s/%s", schema, host, call.url());
+      return String.format("%s://%s%s", schema, host, call.url());
     }
   }
   
