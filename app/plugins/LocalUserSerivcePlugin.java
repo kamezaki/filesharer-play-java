@@ -38,12 +38,18 @@ public class LocalUserSerivcePlugin extends UserServicePlugin {
   }
 
   @Override
-  public Object save(AuthUser user) {
+  public Object save(final AuthUser user) {
     final boolean isLinked = User.existsByAuthUserIdentity(user);
     if (isLinked) {
       // we have this user already
       return null;
     }
     return User.create(user).id;
+  }
+
+  @Override
+  public AuthUser update(final AuthUser knownUser) {
+    User.setLastLoginDate(knownUser);
+    return super.update(knownUser);
   }
 }

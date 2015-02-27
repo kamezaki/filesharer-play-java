@@ -1,7 +1,6 @@
-@(title: String)(content: Html)
+@(title: String, navi:String = "")(content: Html)
 
 <!DOCTYPE html>
-
 <html lang="@lang().code()">
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -18,7 +17,7 @@
   </head>
 
   <body>
-    @topmenu()
+    @topmenu(navi)
     
     <div class="container">
       @if(flash.contains(MessageKey.FLASH_ERROR_KEY)) {

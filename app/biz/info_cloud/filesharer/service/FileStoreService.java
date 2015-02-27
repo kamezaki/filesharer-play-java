@@ -13,6 +13,7 @@ import java.util.function.Consumer;
 
 import org.apache.commons.io.FilenameUtils;
 
+import models.AccessLog;
 import models.ShareFileEntity;
 import models.User;
 import play.Logger;
@@ -44,7 +45,11 @@ public class FileStoreService {
     return new StoredFile(relativePath);
   }
   
-  public List<ShareFileEntity> getUploadList(User user) {
+  public List<AccessLog> getAccessLog(final User user) {
+    return AccessLog.findByUser(user);
+  }
+  
+  public List<ShareFileEntity> getUploadList(final User user) {
     return ShareFileEntity.findByOwner(user);
   }
   
@@ -147,6 +152,11 @@ public class FileStoreService {
       StorageService service = FileStoreService.getStorageService();
       ShareFileEntity entity = getEntity();
       return service.getInputStream(entity.storageFilename);
+    }
+    
+    public AccessLog updateAccessLog(final User user) {
+      final ShareFileEntity entity = getEntity();
+      return AccessLog.updateAccess(user, entity);
     }
     
     private synchronized ShareFileEntity getEntity() {

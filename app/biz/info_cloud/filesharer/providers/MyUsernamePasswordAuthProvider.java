@@ -29,8 +29,7 @@ import play.mvc.Call;
 import play.mvc.Http.Context;
 
 public class MyUsernamePasswordAuthProvider
-  extends UsernamePasswordAuthProvider<String, MyLoginUsernamePasswordAuthUser, MyUsernamePasswordAuthUser, MyUsernamePasswordAuthProvider.MyLogin, MyUsernamePasswordAuthProvider.MySignup>
-{
+  extends UsernamePasswordAuthProvider<String, MyLoginUsernamePasswordAuthUser, MyUsernamePasswordAuthUser, MyUsernamePasswordAuthProvider.MyLogin, MyUsernamePasswordAuthProvider.MySignup> {
   private static final int DEFAULT_HTTP_PORT = 80;
   private static final String SETTING_KEY_VERIFICATION_LINK_SECURE =
       SETTING_KEY_MAIL + "." + "verificationLink.secure";
@@ -124,9 +123,9 @@ public class MyUsernamePasswordAuthProvider
     final String schema = isSecure ? "https" : "http";
     final int port = getConfiguration().getInt(SETTING_KEY_URL_PORT, DEFAULT_HTTP_PORT);
     if (port != DEFAULT_HTTP_PORT) {
-      return String.format("%s://%s:%d/%s", schema, host, port, call.url());
+      return String.format("%s://%s:%d%s", schema, host, port, call.url());
     } else {
-      return String.format("%s://%s/%s", schema, host, call.url());
+      return String.format("%s://%s%s", schema, host, call.url());
     }
   }
   

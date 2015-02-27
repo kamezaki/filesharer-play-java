@@ -56,4 +56,10 @@ public class ShareFileEntity extends Model {
   public String toString() {
     return filePath;
   }
+
+  @Override
+  public void delete() {
+    AccessLog.deleteByEntity(this);
+    super.delete();
+  }
 }

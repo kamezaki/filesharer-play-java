@@ -2,7 +2,7 @@
 
 @import com.feth.play.module.pa.views.html._
 
-@main("Filesharer - User profile") {
+@main("Filesharer - User profile", "profile") {
 <div class="container">
   <div class="row">
     <h1>User profile</h1>
@@ -21,6 +21,7 @@
       }
       
     }
+    <br />
     <br />
     @defining(localUser.getProviders()) { providers =>
         @if(providers.size() > 0) {
@@ -46,6 +47,10 @@
       }
     }
     <br/>
+    Your last access :
+    <script>document.write(toLocalDateTime(@localUser.lastLogin.getTime(), 'lll'));</script>
+    
+    <br />
     @providerAvailable("password") { available =>
       @if(available) {
         <ul>

@@ -32,7 +32,7 @@ import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Http.Request;
 import play.mvc.Http.Session;
 import play.mvc.Result;
-import play.mvc.Security.Authenticated;
+import views.html.accesslog;
 import views.html.index;
 import views.html.login;
 import views.html.profile;
@@ -41,6 +41,8 @@ import views.html.showother;
 import views.html.showtext;
 import views.html.signup;
 import views.html.uploadlist;
+import be.objectify.deadbolt.java.actions.Group;
+import be.objectify.deadbolt.java.actions.Restrict;
 import biz.info_cloud.filesharer.providers.MyUsernamePasswordAuthProvider;
 import biz.info_cloud.filesharer.providers.MyUsernamePasswordAuthProvider.MyLogin;
 import biz.info_cloud.filesharer.providers.MyUsernamePasswordAuthProvider.MySignup;
@@ -114,7 +116,7 @@ public class Application extends Controller {
     });
   }
   
-  @Authenticated(Secured.class)
+  @Restrict(@Group(UserRole.USER))
   public static Promise<Result> profile() {
     return Promise.promise(() -> {
       final User localUser = getLocalUser(session());
@@ -129,15 +131,28 @@ public class Application extends Controller {
   }
   
   @AddCSRFToken
-  @Authenticated(Secured.class)
+  @Restrict(@Group(UserRole.USER))
   public static Promise<Result> uploadList() {
-    User user = getLocalUser(session());
+    final User user = getLocalUser(session());
     return Promise.promise(() -> new FileStoreService().getUploadList(user))
-                  .map(list -> ok(uploadlist.render(list)));
+                  .map(list -> {
+                    Authenticate.noCache(response());
+                    return ok(uploadlist.render(list));
+                  });
+  }
+  
+  @Restrict(@Group(UserRole.USER))
+  public static Promise<Result> accessLog() {
+    final User user = getLocalUser(session());
+    return Promise.promise(() -> new FileStoreService().getAccessLog(user))
+                  .map(list -> {
+                    Authenticate.noCache(response());
+                    return ok(accesslog.render(list));
+                  });
   }
 
   @RequireCSRFCheck
-  @Authenticated(Secured.class)
+  @Restrict(@Group(UserRole.USER))
   public static Promise<Result> delete() {
     return Promise.promise(() -> {
       deleteOwnedFiles(request(), session());
@@ -154,15 +169,17 @@ public class Application extends Controller {
   
   public static Promise<Result> sharer(final String filename) {
     return Promise.promise(() -> getFile(filename))
+                  .map(f -> updateAccess(f, session()))
                   .map(f -> responseSharer(f))
-                  .recover(t -> handleErrro(t));
+                  .recover(t -> handleError(t));
   }
   
   @AddCSRFToken
   public static Promise<Result> show(final String filename) {
     return Promise.promise(() -> getFile(filename))
+                  .map(f -> updateAccess(f, session()))
                   .map(f -> responseShow(f))
-                  .recover(t -> handleErrro(t));
+                  .recover(t -> handleError(t));
   }
   
   public static User getLocalUser(final Session session) {
@@ -186,6 +203,14 @@ public class Application extends Controller {
   private static StoredFile getFile(final String filename) {
     final FileStoreService service = new FileStoreService();
     return service.getStoredFile(filename);
+  }
+  
+  private static StoredFile updateAccess(final StoredFile storedFile, final Session session) {
+    User user = getLocalUser(session);
+    if (user != null) {
+      storedFile.updateAccessLog(getLocalUser(session));
+    }
+    return storedFile;
   }
 
   private static void deleteOwnedFiles(final Request request, final Session session) {
@@ -236,6 +261,7 @@ public class Application extends Controller {
   
   private static Result responseShow(final StoredFile file)
       throws IOException {
+    Authenticate.noCache(response());
     if (!file.exists()) {
       throw new FileNotFoundException(
           String.format("%s is not found", file.getKeyPath()));
@@ -304,7 +330,8 @@ public class Application extends Controller {
     }
   }
   
-  private static Result handleErrro(final Throwable t) {
+  private static Result handleError(final Throwable t) {
+    Logger.debug("handleError", t);
     if (t instanceof FileNotFoundException) {
       return notFound(t.toString());
     }

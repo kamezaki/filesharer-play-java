@@ -3,8 +3,9 @@
 @import helper._
 @implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-sm-3", "col-sm-9") }
 @import com.feth.play.module.pa.views.html._
+@import be.objectify.deadbolt.java.views.html._
 
-@main("Filesharer - Login") {
+@main("Filesharer - Login", "login") {
 <div class="container">
   <div class="row">
     <div class="col-xs-12 text-center">
@@ -36,26 +37,24 @@
   
   <div class="row">
     <div class="center-block" style="width:300px">
-    @currentAuth() { auth =>
-      @if(auth != null) {
-        you already logged in.
-      } else {
-        @providerAvailable("password") { available: Boolean =>
-          @if(available) {
-            <div class="text-center">
-              <a href="@controllers.routes.Application.signup()"><button type="button" class="btn btn-primary btn-lg">Sign up by email</button></a>
-            </div>
-          }
-        }
-        @forProviders() { p =>
+    @subjectPresentOr() {
+      you already logged in.
+    }{
+      @providerAvailable("password") { available: Boolean =>
+        @if(available) {
           <div class="text-center">
-          @if(controllers.Application.providerMap.containsKey(p.getKey())) {
-            <a href="@p.getUrl()"><img src="@routes.Assets.at(controllers.Application.providerMap.get(p.getKey()))" alt="@p.getKey()" class="img-responsive" /></a></li>
-          } else {
-            <a href="@p.getUrl()"><button type="button" class="btn btn-primary btn-lg">@p.getKey()</button></a>
-          }
+            <a href="@controllers.routes.Application.signup()"><button type="button" class="btn btn-primary btn-lg">Sign up by email</button></a>
           </div>
         }
+      }
+      @forProviders() { p =>
+        <div class="text-center">
+        @if(controllers.Application.providerMap.containsKey(p.getKey())) {
+          <a href="@p.getUrl()"><img src="@routes.Assets.at(controllers.Application.providerMap.get(p.getKey()))" alt="@p.getKey()" class="img-responsive" /></a></li>
+        } else {
+           <a href="@p.getUrl()"><button type="button" class="btn btn-primary btn-lg">@p.getKey()</button></a>
+        }
+        </div>
       }
     }
     </div>

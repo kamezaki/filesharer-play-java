@@ -8,11 +8,13 @@
   </div>
   <div class="col-xs-1">
   @isMyOwnFile(relativePath) { owned => 
-    <form action="@routes.Application.delete" method="POST">
-      @CSRF.formField
-      <input type="hidden" name="@controllers.Application.DeleteParam" value="@relativePath">
-      <button type="submit" class="btn btn-sm btn-danger"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
-    </form>
+    @if(owned) {
+      <form action="@routes.Application.delete" method="POST">
+        @CSRF.formField
+        <input type="hidden" name="@controllers.Application.DeleteParam" value="@relativePath">
+        <button type="submit" class="btn btn-sm btn-danger"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
+      </form>
+    }
   }
   </div>
 </div>

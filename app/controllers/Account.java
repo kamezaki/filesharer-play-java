@@ -9,12 +9,13 @@ import play.data.validation.Constraints.Required;
 import play.libs.F.Promise;
 import play.mvc.Controller;
 import play.mvc.Result;
-import play.mvc.Security.Authenticated;
 import views.html.account.ask_link;
 import views.html.account.ask_merge;
 import views.html.account.link;
 import views.html.account.password_change;
 import views.html.account.unverified;
+import be.objectify.deadbolt.java.actions.Group;
+import be.objectify.deadbolt.java.actions.Restrict;
 import be.objectify.deadbolt.java.actions.SubjectPresent;
 import biz.info_cloud.filesharer.providers.MyUsernamePasswordAuthProvider;
 import biz.info_cloud.filesharer.providers.MyUsernamePasswordAuthUser;
@@ -102,7 +103,7 @@ public class Account extends Controller {
     });
   }
   
-  @Authenticated(Secured.class)
+  @Restrict(@Group(UserRole.USER))
   public static Result verifyEmail() {
     Authenticate.noCache(response());
     final User user = Application.getLocalUser(session());
@@ -121,7 +122,7 @@ public class Account extends Controller {
     return redirect(routes.Application.profile());
   }
   
-  @Authenticated(Secured.class)
+  @Restrict(@Group(UserRole.USER))
   public static Promise<Result> changePassword() {
     return Promise.promise(() -> {
       Authenticate.noCache(response());
@@ -133,7 +134,7 @@ public class Account extends Controller {
     });
   }
   
-  @Authenticated(Secured.class)
+  @Restrict(@Group(UserRole.USER))
   public static Promise<Result> doChangePassword() {
     return Promise.promise(() -> {
       Authenticate.noCache(response());
