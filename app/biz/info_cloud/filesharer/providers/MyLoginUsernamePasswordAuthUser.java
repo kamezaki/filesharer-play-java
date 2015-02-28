@@ -13,7 +13,7 @@ public class MyLoginUsernamePasswordAuthUser
       final String clearPassword, final String email) {
     super(clearPassword, email);
     expirationInMillisec =
-        System.currentTimeMillis() + SESSION_TIMEOUT_IN_SEC;
+        System.currentTimeMillis() + SESSION_TIMEOUT_IN_SEC * 1000;
   }
   
   public MyLoginUsernamePasswordAuthUser(final String email) {
