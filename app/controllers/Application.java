@@ -41,6 +41,7 @@ import views.html.showother;
 import views.html.showtext;
 import views.html.signup;
 import views.html.uploadlist;
+import views.html.error.notfound;
 import be.objectify.deadbolt.java.actions.Group;
 import be.objectify.deadbolt.java.actions.Restrict;
 import biz.info_cloud.filesharer.providers.MyUsernamePasswordAuthProvider;
@@ -333,12 +334,13 @@ public class Application extends Controller {
   private static Result handleError(final Throwable t) {
     Logger.debug("handleError", t);
     if (t instanceof FileNotFoundException) {
-      return notFound(t.toString());
+      return notFound(notfound.render(request()));
     }
     return badRequest(t.toString());
   }
   
   private static Result handleUploadError(final Throwable t) {
+    Logger.debug("handleUploadedError", t);
     if (t instanceof MissingFileException) {
       return redirect(controllers.routes.Application.index());
     }

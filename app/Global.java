@@ -22,10 +22,13 @@ import play.mvc.Action;
 import play.mvc.Call;
 import play.mvc.Http.Context;
 import play.mvc.Http.Request;
+import play.mvc.Http.RequestHeader;
 import play.mvc.Result;
+import play.mvc.Results;
 import scala.concurrent.duration.Duration;
 import biz.info_cloud.filesharer.LocalConfig;
 import biz.info_cloud.filesharer.service.FileStoreService;
+import views.html.error.notfound;
 
 public class Global extends GlobalSettings {
   public static final String X_FORWARDED_PROTO = "X-Forwarded-Proto";
@@ -128,5 +131,12 @@ public class Global extends GlobalSettings {
               role.save();
             });
   }
-  
+
+  @Override
+  public Promise<Result> onHandlerNotFound(final RequestHeader request) {
+    Logger.debug(String.format("not found on %s", request.path()));
+    return Promise.promise(() -> {
+      return Results.notFound(notfound.render(request));
+    });
+  }
 }

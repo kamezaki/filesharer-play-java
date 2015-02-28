@@ -13,6 +13,7 @@ import play.mvc.Result;
 import be.objectify.deadbolt.core.models.Subject;
 import be.objectify.deadbolt.java.AbstractDeadboltHandler;
 import be.objectify.deadbolt.java.DynamicResourceHandler;
+import views.html.error.forbidden;
 
 public class MyDeadboltHandler extends AbstractDeadboltHandler {
 
@@ -50,12 +51,8 @@ public class MyDeadboltHandler extends AbstractDeadboltHandler {
 
   @Override
   public Promise<Result> onAuthFailure(final Context context, final String content) {
-    return F.Promise.promise(new F.Function0<Result>() {
-
-      @Override
-      public Result apply() throws Throwable {
-        return forbidden("Forbidden");
-      }
+    return F.Promise.promise(() -> {
+      return forbidden(forbidden.render(context.request()));
     });
   }
 
