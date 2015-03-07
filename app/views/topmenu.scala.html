@@ -19,7 +19,7 @@
  
     <div class="collapse navbar-collapse" id="topmenu">
       <ul class="nav navbar-nav">
-        <li class="@("active".when(navi==""))"><a href="@routes.Application.index">Main</a></li>
+        <li class="@("active".when(navi=="main"))"><a href="@routes.Application.index">Main</a></li>
         @subjectPresent() {
           <li class="@("active".when(navi=="uploadlist"))"><a href="@routes.Application.uploadList">Upload List</a></li>
           <li class="@("active".when(navi=="accesslog"))"><a href="@routes.Application.accessLog">Access Log</a></li>
