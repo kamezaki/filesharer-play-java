@@ -8,16 +8,6 @@ import models.LinkedAccount;
 import models.TokenAction;
 import models.TokenAction.Type;
 import models.User;
-import biz.info_cloud.filesharer.LocalConfig;
-
-import com.amazonaws.util.StringUtils;
-import com.feth.play.module.mail.Mailer.Mail.Body;
-import com.feth.play.module.pa.PlayAuthenticate;
-import com.feth.play.module.pa.providers.password.UsernamePasswordAuthProvider;
-import com.feth.play.module.pa.providers.password.UsernamePasswordAuthUser;
-
-import controllers.MessageKey;
-import controllers.routes;
 import play.Application;
 import play.Logger;
 import play.data.Form;
@@ -27,18 +17,24 @@ import play.data.validation.Constraints.Required;
 import play.i18n.Lang;
 import play.mvc.Call;
 import play.mvc.Http.Context;
+import biz.info_cloud.filesharer.LocalConfig;
+
+import com.feth.play.module.mail.Mailer.Mail.Body;
+import com.feth.play.module.pa.PlayAuthenticate;
+import com.feth.play.module.pa.providers.password.UsernamePasswordAuthProvider;
+import com.feth.play.module.pa.providers.password.UsernamePasswordAuthUser;
+
+import controllers.MessageKey;
+import controllers.routes;
 
 public class MyUsernamePasswordAuthProvider
   extends UsernamePasswordAuthProvider<String, MyLoginUsernamePasswordAuthUser, MyUsernamePasswordAuthUser, MyUsernamePasswordAuthProvider.MyLogin, MyUsernamePasswordAuthProvider.MySignup> {
-  private static final int DEFAULT_HTTP_PORT = 80;
   private static final String SETTING_KEY_VERIFICATION_LINK_SECURE =
       SETTING_KEY_MAIL + "." + "verificationLink.secure";
   private static final String SETTING_KEY_PASSWORD_RESET_LINK_SECURE =
       SETTING_KEY_MAIL + "." + "passwordResetLink.secure";
   private static final String SETTING_KEY_LINK_LOGIN_AFTER_PASSWORD_RESET =
       "loginAfterPasswordReset";
-  private static final String SETTING_KEY_URL_HOST="urlHost";
-  private static final String SETTING_KEY_URL_PORT="urlPort";
 
   private static final String EMAIL_TEMPLATE_FALLBACK_LANGUAGE = "en";
   
@@ -115,18 +111,7 @@ public class MyUsernamePasswordAuthProvider
   }
   
   private String getUrl(Call call, boolean isSecure, Context context) {
-    final String host = getConfiguration().getString(SETTING_KEY_URL_HOST);
-    if (StringUtils.isNullOrEmpty(host)) {
-      return call.absoluteURL(context.request(), isSecure);
-    }
-
-    final String schema = isSecure ? "https" : "http";
-    final int port = getConfiguration().getInt(SETTING_KEY_URL_PORT, DEFAULT_HTTP_PORT);
-    if (port != DEFAULT_HTTP_PORT) {
-      return String.format("%s://%s:%d%s", schema, host, port, call.url());
-    } else {
-      return String.format("%s://%s%s", schema, host, call.url());
-    }
+    return call.absoluteURL(context.request(), isSecure);
   }
   
   protected Body generatePasswordResetMailingBody(final String token, final User user, final Context context) {
