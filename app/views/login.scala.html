@@ -5,7 +5,7 @@
 @import com.feth.play.module.pa.views.html._
 @import be.objectify.deadbolt.java.views.html._
 
-@main("Filesharer - Login", "login") {
+@main("login", "login") {
 <div class="container">
   <div class="row">
     <div class="col-xs-12 text-center">
@@ -24,7 +24,7 @@
           }
           @b3.email( loginForm("email"), '_label -> "Email", 'placeholder -> "example@mail.com" )
           @b3.password( loginForm("password"), '_label -> "Password", 'placeholder -> "Password" )
-          @b3.submit('class -> "btn btn-default"){ Login now }
+          @b3.submit('class -> "btn btn-primary"){ Login now }
 
         }
         <div class="text-right">
@@ -43,7 +43,7 @@
       @providerAvailable("password") { available: Boolean =>
         @if(available) {
           <div class="text-center">
-            <a href="@controllers.routes.Application.signup()"><button type="button" class="btn btn-primary btn-lg">Sign up by email</button></a>
+            <a href="@controllers.routes.Application.signup()"><button type="button" class="btn btn-info btn-lg">Sign up by email</button></a>
           </div>
         }
       }
