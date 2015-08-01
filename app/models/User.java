@@ -199,9 +199,9 @@ public class User extends Model implements Subject {
       } else {
         throw new RuntimeException("Account not enabled for password usage.");
       }
-      link.providerUserId = authUser.getHashedPassword();
-      link.save();
     }
+    link.providerUserId = authUser.getHashedPassword();
+    link.save();
   }
   
   public void resetPassword(

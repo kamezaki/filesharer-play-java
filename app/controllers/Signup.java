@@ -6,6 +6,7 @@ import models.User;
 import biz.info_cloud.filesharer.providers.MyLoginUsernamePasswordAuthUser;
 import biz.info_cloud.filesharer.providers.MyUsernamePasswordAuthProvider;
 import biz.info_cloud.filesharer.providers.MyUsernamePasswordAuthProvider.MyIdentity;
+import biz.info_cloud.filesharer.providers.MyUsernamePasswordAuthUser;
 
 import com.feth.play.module.pa.PlayAuthenticate;
 import com.feth.play.module.pa.controllers.Authenticate;
@@ -56,7 +57,7 @@ public class Signup extends Controller {
     }
     final User user = action.targetUser;
     try {
-      user.resetPassword(new MyLoginUsernamePasswordAuthUser(newPassword), false);
+      user.resetPassword(new MyUsernamePasswordAuthUser(newPassword), false);
     } catch (RuntimeException e) {
       flash(MessageKey.FLASH_MESSAGE_KEY, "Your user has not yet been set up for password usage.");
     }
